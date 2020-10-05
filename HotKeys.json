@@ -1,0 +1,134 @@
+//////////////////////////////////////////////////////////
+// Shortcut definitions
+//////////////////////////////////////////////////////////
+// Possible modifiers are "Control", "Alt", "Shift".
+// You can add multiple modifiers, separated by commas.
+// Or delete the modifier (leaving the [ ] characters) to
+// have no modifier
+//////////////////////////////////////////////////////////
+// The key code can be found by consulting this page:
+// https://docs.microsoft.com/en-us/dotnet/api/system.windows.forms.keys?view=netframework-4.7.2
+// The code to use is in the first column.
+//////////////////////////////////////////////////////////
+// If a shortcut is already taken by another program
+// it will not be available in this program
+//////////////////////////////////////////////////////////
+// To disable a hotkey, set the key value to null
+// (without quotes) or remove that line.
+//////////////////////////////////////////////////////////
+[
+  {
+    "name": "btnUnlockEquips",
+    "modifiers": [],
+    "key": "NumPad0"
+  },
+  {
+    "name": "toggleAlert",
+    "modifiers": [],
+    "key": "NumPad1"
+  },
+  {
+    "name": "btnAlertOn",
+    "modifiers": [],
+    "key": "NumPad2"
+  },
+  {
+    "name": "btnAlertOff",
+    "modifiers": [],
+    "key": "NumPad3"
+  },
+  {
+    "name": "toggleCaution",
+    "modifiers": [],
+    "key": "NumPad4"
+  },
+  {
+    "name": "btnCautionOn",
+    "modifiers": [],
+    "key": "NumPad5"
+  },
+  {
+    "name": "btnCautionOff",
+    "modifiers": [],
+    "key": "NumPad6"
+  },
+  {
+    "name": "btnRestartRoom",
+    "modifiers": [],
+    "key": "NumPad7"
+  },
+  {
+    "name": "btnSuicide",
+    "modifiers": [],
+    "key": "NumPad8"
+  },
+  {
+    "name": "btnHealthFill",
+    "modifiers": [],
+    "key": "NumPad9"
+  },
+
+  //////////////////////////////////////////////////////////
+  // Scroll through weapons from a particular group
+  // (commented out by default, remove the /* and */ below to enable)
+  //////////////////////////////////////////////////////////
+  /*
+  {
+    "name":      "weaponGroup1",
+    "modifiers": [  ],
+    "key":       "F1"
+  },
+  {
+    "name":      "weaponGroup2",
+    "modifiers": [  ],
+    "key":       "F2"
+  },
+  {
+    "name":      "weaponGroup3",
+    "modifiers": [  ],
+    "key":       "F3"
+  },
+  {
+    "name":      "weaponGroup4",
+    "modifiers": [  ],
+    "key":       "F4"
+  },
+  {
+    "name":      "weaponGroup5",
+    "modifiers": [  ],
+    "key":       "F5"
+  },
+  {
+    "name":      "weaponGroup6",
+    "modifiers": [  ],
+    "key":       "F6"
+  },
+  {
+    "name":      "weaponGroup7",
+    "modifiers": [  ],
+    "key":       "F7"
+  },
+  {
+    "name":      "weaponGroup8",
+    "modifiers": [  ],
+    "key":       "F8"
+  },
+  {
+    "name":      "weaponGroup9",
+    "modifiers": [  ],
+    "key":       "F9"
+  },
+  {
+    "name":      "weaponGroup0",
+    "modifiers": [  ],
+    "key":       "F10"
+  },
+  */
+
+  // This is just here to reduce the chance of comma-related mistakes creeping in
+  {
+    "name": "end",
+    "modifiers": [],
+    "key": null
+  }
+]

@@ -1,0 +1,175 @@
+﻿<Window x:Class="MGS2Trainer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MGS2Trainer"
+        mc:Ignorable="d"
+        Title="MGS2 Trainer" Height="468" Width="240" WindowStartupLocation="CenterScreen"
+        KeyUp="Window_KeyUp">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="158"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="88"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" Margin="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="2*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0" Grid.ColumnSpan="3" ToolTip="The text shown below your life bar. Exit the area to take effect." Margin="0,0,0,2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="22"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="2" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" x:Name="btnOpenAbout" ToolTip="About MGS2 Trainer" Click="btnOpenAbout_Click">
+                    <Button.Content>
+                        <Image Source="Resources\F1Help\F1Help_16x.png" Width="18" Margin="-4"/>
+                    </Button.Content>
+                </Button>
+                <TextBlock Text="Name:" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <TextBox x:Name="txtName" Grid.Column="1" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="20"/>
+            </Grid>
+            <TextBlock Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Bottom">Cur</TextBlock>
+            <TextBlock Grid.Row="1" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Bottom">Max</TextBlock>
+            <ComboBox x:Name="cmbWeaponName" Grid.Row="2" Grid.Column="0" SelectedIndex="{Binding WeaponSelected, Mode=TwoWay}" ToolTip="Weapon ammo count. Set current to -1 to remove, or 1 to give a weapon without ammo.">
+                <ComboBoxItem Content="M9"/>
+                <ComboBoxItem Content="USP"/>
+                <ComboBoxItem Content="SOCOM"/>
+                <ComboBoxItem Content="PSG-1"/>
+                <ComboBoxItem Content="RGB6"/>
+                <ComboBoxItem Content="Nikita"/>
+                <ComboBoxItem Content="Stinger"/>
+                <ComboBoxItem Content="Claymore"/>
+                <ComboBoxItem Content="C4"/>
+                <ComboBoxItem Content="Chaff Grenade"/>
+                <ComboBoxItem Content="Stun Grenade"/>
+                <ComboBoxItem Content="D.Mic"/>
+                <ComboBoxItem Content="HF Blade"/>
+                <ComboBoxItem Content="Coolant"/>
+                <ComboBoxItem Content="AK-74u"/>
+                <ComboBoxItem Content="Magazine"/>
+                <ComboBoxItem Content="Grenade"/>
+                <ComboBoxItem Content="M4"/>
+                <ComboBoxItem Content="PSG-1T"/>
+                <ComboBoxItem Content="D.Mic (cutscene)"/>
+                <ComboBoxItem Content="Book"/>
+            </ComboBox>
+            <TextBox x:Name="txtWeaponCurrent" Grid.Row="2" Grid.Column="1" Text="{Binding WeaponAmmoCurrent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            <TextBox x:Name="txtWeaponMax" Grid.Row="2" Grid.Column="2" Text="{Binding WeaponAmmoMax, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            <ComboBox x:Name="cmbItemName" Grid.Row="3" Grid.Column="0"  SelectedIndex="{Binding ItemSelected, Mode=TwoWay}"  ToolTip="Item ammo count. Set current to -1 to remove, or 1 to give an item without ammo.">
+                <ComboBoxItem Content="Ration"/>
+                <ComboBoxItem Content="Scope (no action)"/>
+                <ComboBoxItem Content="Medicine"/>
+                <ComboBoxItem Content="Bandage"/>
+                <ComboBoxItem Content="Pentazemin"/>
+                <ComboBoxItem Content="B.D.U."/>
+                <ComboBoxItem Content="B.Armor"/>
+                <ComboBoxItem Content="Stealth"/>
+                <ComboBoxItem Content="Mine Detector"/>
+                <ComboBoxItem Content="Sensor A"/>
+                <ComboBoxItem Content="Sensor B"/>
+                <ComboBoxItem Content="Night Vision Goggles"/>
+                <ComboBoxItem Content="Thermal Goggles"/>
+                <ComboBoxItem Content="Scope"/>
+                <ComboBoxItem Content="Digital Camera"/>
+                <ComboBoxItem Content="Box 1"/>
+                <ComboBoxItem Content="Cigs"/>
+                <ComboBoxItem Content="Card"/>
+                <ComboBoxItem Content="Shaver"/>
+                <ComboBoxItem Content="Phone"/>
+                <ComboBoxItem Content="Camera"/>
+                <ComboBoxItem Content="Box 2"/>
+                <ComboBoxItem Content="Box 3"/>
+                <ComboBoxItem Content="Wet Box"/>
+                <ComboBoxItem Content="AP Sensor"/>
+                <ComboBoxItem Content="Box 4"/>
+                <ComboBoxItem Content="Box 5"/>
+                <ComboBoxItem Content="??"/>
+                <ComboBoxItem Content="SOCOM Suppressor"/>
+                <ComboBoxItem Content="AK Suppressor"/>
+                <ComboBoxItem Content="Camera (no action)"/>
+                <ComboBoxItem Content="Bandana"/>
+                <ComboBoxItem Content="Dog Tags"/>
+                <ComboBoxItem Content="MO Disc"/>
+                <ComboBoxItem Content="USP Suppressor"/>
+                <ComboBoxItem Content="Infinity Wig (Brown)"/>
+                <ComboBoxItem Content="Wig A (Blue)"/>
+                <ComboBoxItem Content="Wig B (Orange)"/>
+                <ComboBoxItem Content="Wig C (Color)"/>
+                <ComboBoxItem Content="Wig D (Color)"/>
+            </ComboBox>
+            <TextBox x:Name="txtItemCurrent" Grid.Row="3" Grid.Column="1" Text="{Binding ItemAmmoCurrent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            <TextBox x:Name="txtItemMax" Grid.Row="3" Grid.Column="2" Text="{Binding ItemAmmoMax, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            <ComboBox x:Name="cmbProgress" Grid.Row="4" Grid.ColumnSpan="2" ItemsSource="{Binding ProgressNames.Values, Mode=OneWay}" SelectedIndex="{Binding ProgressCurrentInList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ToolTip="Game progress flag. This does not change your location."/>
+            <TextBox x:Name="txtProgress" Grid.Row="4" Grid.Column="2" Text="{Binding ProgressCurrent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            <ComboBox x:Name="cmbInitialState" Grid.Row="5" Grid.Column="0" ItemsSource="{Binding InitialStateAreas, Mode=OneWay}" SelectedIndex="{Binding InitialState, Mode=TwoWay}" ToolTip="Restore this area to its first-time-only state when reentering it."/>
+            <TextBlock Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" Text=" at initial state" VerticalAlignment="Center"/>
+            <TextBlock Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Text="Dog Tags always available" VerticalAlignment="Center" HorizontalAlignment="Right" ToolTip="Restore the uncollected state of all dog tags when reentering an area."/>
+            <CheckBox x:Name="chkLockDogTags" Grid.Row="6" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" IsChecked="{Binding LockDogTags, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+        </Grid>
+        <Button x:Name="btnUnlockEquips" Content="Unlock All Equips" Grid.Row="1" Click="btnUnlockEquips_Click" MouseRightButtonUp="btnUnlockEquips_RightClick" ToolTip="Right click to unlock all equips regardless of character."/>
+        <Button x:Name="btnAlertOn" Content="Alert On" Grid.Row="2" Click="btnAlertOn_Click"/><!-- MouseRightButtonUp="btnAlertOn_RightClick"/>-->
+        <Button x:Name="btnAlertOff" Content="Alert Off" Grid.Row="3" Click="btnAlertOff_Click"/>
+        <!-- MouseRightButtonUp="btnAlertOff_RightClick"/>-->
+        <Button x:Name="btnCautionOn" Content="Caution On (60 secs)" Grid.Row="4" Click="btnCautionOn_Click" MouseRightButtonUp="btnCautionOn_RightClick" ToolTip="Right click to change duration."/>
+        <Button x:Name="btnCautionOff" Content="Caution Off" Grid.Row="5" Click="btnCautionOff_Click"/>
+        <!-- MouseRightButtonUp="btnUnlockOff_RightClick"/>-->
+        <Button x:Name="btnSuicide" Content="Suicide" Grid.Row="6" Click="btnSuicide_Click"/>
+        <Button x:Name="btnHealthFill" Content="Full Health" Grid.Row="7" Click="btnHealthFill_Click"/>
+        <Grid Grid.Row="8" Margin="4">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="1*" />
+                <!--<ColumnDefinition Width="1*" />-->
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="txtPosXDisplay" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding PositionX, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ToolTip="X Position (Left/Right). Higher values are further right." TextTrimming="CharacterEllipsis"/>
+            <TextBlock x:Name="txtPosYDisplay" Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Text="{Binding PositionY, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ToolTip="Y Position (Forward/Back). Higher values are further forward." TextTrimming="CharacterEllipsis"/>
+            <TextBlock x:Name="txtPosZDisplay" Grid.Row="0" Grid.Column="4" Grid.ColumnSpan="2" Text="{Binding PositionZ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ToolTip="Z Position (Up/Down). Higher values are further down." TextTrimming="CharacterEllipsis"/>
+
+            <CheckBox x:Name="chkPosXLock" Grid.Row="1" Grid.Column="0" Checked="chkPosXLock_Checked" Unchecked="chkPosXLock_Unchecked" ToolTip="Enable typing in a new X position."/>
+            <TextBox x:Name="txtPosX" Grid.Row="1" Grid.Column="1" ToolTip="X position to move to."/>
+            <CheckBox x:Name="chkPosYLock" Grid.Row="1" Grid.Column="2" Checked="chkPosYLock_Checked" Unchecked="chkPosYLock_Unchecked" ToolTip="Enable typing in a new Y position."/>
+            <TextBox x:Name="txtPosY" Grid.Row="1" Grid.Column="3" ToolTip="Y position to move to."/>
+            <CheckBox x:Name="chkPosZLock" Grid.Row="1" Grid.Column="4" Checked="chkPosZLock_Checked" Unchecked="chkPosZLock_Unchecked" ToolTip="Enable typing in a new Z position."/>
+            <TextBox x:Name="txtPosZ" Grid.Row="1" Grid.Column="5" ToolTip="Z position to move to."/>
+
+            <Slider x:Name="sldPosXDelta" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Maximum="1000" SmallChange="10" Minimum="-1000" LargeChange="50" Value="{Binding PositionXDelta, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="100" MouseDoubleClick="sldPosDelta_DoubleClick" ToolTip="Gradually change X position at a specific speed. Double click or press Esc to stop."/>
+            <Slider x:Name="sldPosYDelta" Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Maximum="1000" SmallChange="10" Minimum="-1000" LargeChange="50" Value="{Binding PositionYDelta, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="100" MouseDoubleClick="sldPosDelta_DoubleClick" ToolTip="Gradually change Y position at a specific speed. Double click or press Esc to stop." />
+            <Slider x:Name="sldPosZDelta" Grid.Row="2" Grid.Column="4" Grid.ColumnSpan="2" Maximum="1000" SmallChange="10" Minimum="-1000" LargeChange="50" Value="{Binding PositionZDelta, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="100" MouseDoubleClick="sldPosDelta_DoubleClick" ToolTip="Gradually change Z position at a specific speed. Double click or press Esc to stop." />
+
+            <Button x:Name="btnUpdatePos" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Content="Update" Click="btnUpdatePos_Click" ToolTip="Set X/Y/Z positions to those in the boxes above."/>
+            <Button x:Name="btnPosZToggle" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" Content="[Un]Lock Z" Click="btnPosZToggle_Click" ToolTip="Lock/unlock the Z position (e.g. for air walking). This also affects enemies."/>
+            <Button x:Name="btnPosZRecover" Grid.Row="3" Grid.Column="4" Grid.ColumnSpan="2" Content="Recover Z" Click="btnPosZRecover_Click" ToolTip="Use if you've fallen into the void."/>
+        </Grid>
+    </Grid>
+</Window>
