@@ -23,6 +23,12 @@ using NHotkey.Wpf;
 using System.Text.Json;
 using System.CodeDom;
 using Path = System.IO.Path;
+using System.Numerics;
+using System.Dynamic;
+using CommandLine;
+using CommandLine.Text;
+using System.Reflection;
+using Microsoft.CodeAnalysis;
 
 namespace MGS2Trainer
 {
@@ -30,8 +36,10 @@ namespace MGS2Trainer
     public class HotkeyJson
     {
         public string Name { get; set; }
-        public string Key { get; set; }
-        public string[] Modifiers { get; set; }
+        public string Key { get; set; } = null;
+        public string[] Modifiers { get; set; } = new string[0];
+        public string[] Pad { get; set; } = new string[0];
+        public JsonElement Data { get; set; }
     }
 
     /// <summary>
@@ -39,12 +47,17 @@ namespace MGS2Trainer
     /// </summary>
     public partial class MainWindow : Window
     {
+        private App Application { get; set; }
         private Trainer Train { get; set; }
         private Timer Timeout { get; set; }
         private Timer TimeoutPos { get; set; }
 
-        public MainWindow()
+        public MainWindow(App app)
         {
+            ToolTipService.ShowDurationProperty.OverrideMetadata(typeof(DependencyObject), new FrameworkPropertyMetadata(Int32.MaxValue));
+
+            Application = app;
+
             Train = new Trainer();
             DataContext = Train;
 
@@ -64,6 +77,8 @@ namespace MGS2Trainer
 
             txtName.KeyUp += SetName;
 
+            cmbDifficulty.SelectionChanged += SetDifficulty;
+
             Timeout = new Timer(1000);
             Timeout.Elapsed += UpdateValues;
             Timeout.Enabled = true;
@@ -72,6 +87,38 @@ namespace MGS2Trainer
             TimeoutPos.Elapsed += UpdateDeltaMovement;
             TimeoutPos.Enabled = true;
 
+            var commandHelp = new List<string>();
+            var commandProps = typeof(CommandOptions).GetProperties();
+            foreach (PropertyInfo prop in commandProps)
+            {
+                string txt = prop.GetCustomAttribute<OptionAttribute>().HelpText;
+                int pos = txt.IndexOf(" :: ");
+                string left = txt.Substring(0, pos);
+                string right = txt.Substring(pos + 4);
+
+                commandHelp.Add(left.PadRight(20) + right);
+            }
+            txtCLICommandToolTip.Text += Environment.NewLine + string.Join(Environment.NewLine, commandHelp); 
+        }
+
+        private void btnRunCLICommand_Click(object sender, RoutedEventArgs e) => RunCLICommand(txtCLICommand.Text);
+        private void RunCLICommand(string command) {
+            string cmd = "command " + command;
+            string[] cmds = CommandLineParser.SplitCommandLineIntoArguments(cmd, true).ToArray<string>();
+            Application.ParseOptions(cmds);
+            if (!txtCLICommand.IsFocused)
+            {
+                txtCLICommand.Focus();
+            }
+            txtCLICommand.SelectAll();
+        }
+
+        private void txtCLICommand_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                RunCLICommand(txtCLICommand.Text);
+            }
         }
 
         private void btnOpenAbout_Click(object sender, RoutedEventArgs e)
@@ -89,20 +136,53 @@ namespace MGS2Trainer
             }
         }
 
+        private JsonElement GetHotkeyData(HotkeyEventArgs e)
+        {
+            if (HotkeyData.ContainsKey(e.Name))
+            {
+                return HotkeyData[e.Name];
+            }
+            return new JsonElement();
+        }
+
+        public Dictionary<string, JsonElement> HotkeyData = new Dictionary<string, JsonElement>();
+        public Dictionary<string, int> HotkeyCounter = new Dictionary<string, int>();
         private void RegisterHotKeys()
         {
+            // todo remove button lambdas and roll into button defs
             var lambdas = new Dictionary<string, EventHandler<HotkeyEventArgs>>()
             {
-                { "btnRestartRoom", (sender, e) => { Train.DoRestartRoom(); } },
-                { "btnSuicide", (sender, e) => { Train.DoSuicide(); } },
-                { "btnHealthFill", (sender, e) => { Train.SetHealthFull(); } },
-                { "toggleCaution", (sender, e) => { Train.ToggleCaution(); } },
-                { "btnCautionOff", (sender, e) => { Train.SetCautionOff(); } },
-                { "btnCautionOn", (sender, e) => { Train.SetCautionOn(); } },
-                { "toggleAlert", (sender, e) => { Train.ToggleAlert(); } },
-                { "btnAlertOff", (sender, e) => { Train.SetAlertOff(); } },
-                { "btnAlertOn", (sender, e) => { Train.SetAlertOn(); } },
-                { "btnUnlockEquips", (sender, e) => { Train.UnlockAllEquips(); } }
+                { "SaveState", (sender, e) => State.SaveState() },
+                { "LoadState", (sender, e) => State.LoadState() },
+                { "SetProgress", (sender, e) => {
+                    var d = GetHotkeyData(e);
+                    if (d.ValueKind == JsonValueKind.Number) {
+                        d.TryGetInt16(out short v);
+                        Train.SetProgress(v);
+                    }
+                    else if (d.ValueKind == JsonValueKind.Array)
+                    {
+                        if (!HotkeyCounter.ContainsKey(e.Name))
+                        {
+                            HotkeyCounter[e.Name] = 0;
+                        }
+                        var vals = new List<short>();
+                        foreach (var k in d.EnumerateArray())
+                        {
+                            if (k.ValueKind == JsonValueKind.Number)
+                            {
+                                k.TryGetInt16(out short l);
+                                vals.Add(l);
+                            }
+                        }
+                        Train.SetProgress((short)(vals[HotkeyCounter[e.Name] % vals.Count]));
+                        HotkeyCounter[e.Name]++;
+                    }
+                    else
+                    {
+                        Train.SetProgress((short)(Train.ProgressCurrent + 1));
+                    }
+                } }
             };
             for (byte i = 0; i < 10; i++)
             {
@@ -117,14 +197,19 @@ namespace MGS2Trainer
 
             var btnContent = new Dictionary<string, Button>()
             {
-                { "btnRestartRoom", btnRestartRoom },
-                { "btnSuicide", btnSuicide },
-                { "btnHealthFill", btnHealthFill },
-                { "btnCautionOff", btnCautionOff },
-                { "btnCautionOn", btnCautionOn },
-                { "btnAlertOff", btnAlertOff },
-                { "btnAlertOn", btnAlertOn },
-                { "btnUnlockEquips", btnUnlockEquips }
+                { "RestartRoom", btnRestartRoom },
+                { "Suicide", btnSuicide },
+                { "HealthFill", btnHealthFill },
+                { "CautionToggle", btnCautionToggle },
+                { "CautionOff", btnCautionOff },
+                { "CautionOn", btnCautionOn },
+                { "AlertToggle", btnAlertToggle },
+                { "AlertOff", btnAlertOff },
+                { "AlertOn", btnAlertOn },
+                { "UnlockEquips", btnUnlockEquips },
+                { "UpdatePos", btnUpdatePos },
+                { "PosZToggle", btnPosZToggle },
+                { "PosZRecover", btnPosZRecover }
             };
 
             string filename = Path.Combine(Directory.GetCurrentDirectory(), "HotKeys.json");
@@ -135,9 +220,32 @@ namespace MGS2Trainer
             var data = JsonSerializer.Deserialize<HotkeyJson[]>(json, new JsonSerializerOptions()
             {
                 PropertyNameCaseInsensitive = true,
-                ReadCommentHandling = JsonCommentHandling.Skip
+                ReadCommentHandling = JsonCommentHandling.Skip,
+                
             });
 
+            RoutedEventArgs eventArgs = new RoutedEventArgs(Button.ClickEvent);
+
+            var padMask = new Dictionary<string, int>
+            {
+                { "up", 0x1000 }, { "stickup", 0x1000 },
+                { "down", 0x4000 }, { "stickdown", 0x4000 },
+                { "left", 0x8000 }, { "stickleft", 0x8000 },
+                { "action", 0x10 }, { "triangle", 0x10 },
+                { "punch", 0x20 }, { "circle", 0x20 },
+                { "crouch", 0x40 }, { "cross", 0x40 }, { "x", 0x40 },
+                { "weapon", 0x80 }, { "square", 0x80 },
+                { "start", 0x800 },
+                { "select", 0x100 }, { "back", 0x100 },
+                { "lockon", 1 }, { "l1", 1 },
+                { "firstperson", 2 }, { "r1", 2 },
+                { "itemmenu", 4 }, { "l2", 4 },
+                { "weaponmenu", 8 }, { "r2", 8 },
+                { "leftstick", 0x60000 }, { "l3", 0x60000 },
+                { "rightstick", 0x400 }, { "r3", 0x400 }
+            };
+
+            int j = 0;
             foreach (var key in data)
             {
                 try
@@ -152,12 +260,31 @@ namespace MGS2Trainer
                             modkey |= (ModifierKeys)Enum.Parse(typeof(ModifierKeys), mod);
                             hotkeyname += $"{mod}+";
                         }
-                        HotkeyManager.Current.AddOrReplace(key.Name, hotkey, modkey, lambdas[key.Name]);
 
-                        if (btnContent.ContainsKey(key.Name))
+                        if (lambdas.ContainsKey(key.Name))
                         {
-                            btnContent[key.Name].Content = $"[{hotkeyname}{key.Key}] {btnContent[key.Name].Content.ToString()}";
+                            string name = key.Name + j++;
+                            HotkeyData.Add(name, key.Data);
+                            HotkeyManager.Current.AddOrReplace(name, hotkey, modkey, lambdas[key.Name]);
                         }
+
+                        else if (btnContent.ContainsKey(key.Name))
+                        {
+                            Button btn = btnContent[key.Name];
+
+                            HotkeyManager.Current.AddOrReplace(key.Name + j++, hotkey, modkey, (sender, e) => { btn.RaiseEvent(eventArgs); });
+
+                            //btnContent[key.Name].Content = $"[{hotkeyname}{key.Key}] {btnContent[key.Name].Content.ToString()}";
+                            if (btn.ToolTip != null)
+                            {
+                                btn.ToolTip = " " + btn.ToolTip;
+                            }
+                            btn.ToolTip = $"[{hotkeyname}{key.Key}]{btn.ToolTip}";
+                        }
+                    }
+                    if (key.Pad.Length > 0)
+                    {
+
                     }
                 }
                 catch (HotkeyAlreadyRegisteredException)
@@ -180,6 +307,7 @@ namespace MGS2Trainer
                     Train.Mem.RefreshProcess();
 
                     Train.WatchInitialStates();
+                    Train.WatchBossPractice();
 
                     if ((!cmbWeaponName.IsDropDownOpen) && (!txtWeaponCurrent.IsFocused) && (!txtWeaponMax.IsFocused))
                     {
@@ -195,6 +323,7 @@ namespace MGS2Trainer
                     }
 
                     RefreshProgressValue();
+                    Train.RefreshDifficulty();
 
                     Train.RelockDogTags();
                 }
@@ -256,11 +385,17 @@ namespace MGS2Trainer
         private void btnUnlockEquips_RightClick(object sender, RoutedEventArgs e) => btnUnlockEquips_RightClick();
         private void btnUnlockEquips_RightClick() => Train.UnlockAllEquips(true);
 
+        private void btnAlertToggle_Click(object sender, RoutedEventArgs e) => btnAlertToggle_Click();
+        private void btnAlertToggle_Click() => Train.ToggleAlert();
+
         private void btnAlertOn_Click(object sender, RoutedEventArgs e) => btnAlertOn_Click();
         private void btnAlertOn_Click() => Train.SetAlertOn();
         
         private void btnAlertOff_Click(object sender, RoutedEventArgs e) => btnAlertOff_Click();
         private void btnAlertOff_Click() => Train.SetAlertOff();
+
+        private void btnCautionToggle_Click(object sender, RoutedEventArgs e) => btnCautionToggle_Click();
+        private void btnCautionToggle_Click() => Train.ToggleCaution();
 
         private void btnCautionOn_Click(object sender, RoutedEventArgs e) => btnCautionOn_Click();
         private void btnCautionOn_Click() => Train.SetCautionOn();
@@ -270,10 +405,14 @@ namespace MGS2Trainer
             {
                 Train.CautionDurationIndex = 0;
             }
-            
+
+            /*
             string s = btnCautionOn.Content.ToString();
             string prefix = s.Substring(0, s.LastIndexOf("("));
             btnCautionOn.Content = $"{prefix}({Trainer.CautionDurations[Train.CautionDurationIndex]} secs)";
+            */
+
+            btnCautionOn.Content = $"{Trainer.CautionDurations[Train.CautionDurationIndex]} secs";
         }
 
         private void btnCautionOff_Click(object sender, RoutedEventArgs e) => btnCautionOff_Click();
@@ -287,6 +426,8 @@ namespace MGS2Trainer
 
         private void btnHealthFill_Click(object sender, RoutedEventArgs e) => btnHealthFill_Click();
         private void btnHealthFill_Click() => Train.SetHealthFull();
+
+        private void btnHealthFill_RightClick(object sender, RoutedEventArgs e) => Train.ToggleHealthLock();
 
         private void RefreshWeaponValues(object sender, RoutedEventArgs e) => Train.RefreshWeaponValues();
 
@@ -310,6 +451,8 @@ namespace MGS2Trainer
         private void SetProgress(object sender, SelectionChangedEventArgs e) => Train.SetProgress(true);
 
         private void SetProgress(object sender, KeyEventArgs e) => Train.SetProgress(false);
+
+        private void SetDifficulty(object sender, SelectionChangedEventArgs e) => Train.SetDifficulty((byte)cmbDifficulty.SelectedIndex);
 
         private void SetName(object sender, KeyEventArgs e) => Train.SetName();
 
@@ -371,5 +514,10 @@ namespace MGS2Trainer
         private void btnPosZToggle_Click(object sender, RoutedEventArgs e) => Train.ToggleZMovement();
 
         private void sldPosDelta_DoubleClick(object sender, MouseButtonEventArgs e) => ((Slider)sender).Value = 0;
+
+        private void chkBossPractice_RightClick(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

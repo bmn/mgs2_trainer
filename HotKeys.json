@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////
 // Possible modifiers are "Control", "Alt", "Shift".
 // You can add multiple modifiers, separated by commas.
+// e.g. ["Control", "Shift"]
 // Or delete the modifier (leaving the [ ] characters) to
 // have no modifier
 //////////////////////////////////////////////////////////
@@ -16,56 +17,115 @@
 // To disable a hotkey, set the key value to null
 // (without quotes) or remove that line.
 //////////////////////////////////////////////////////////
+// Pad shortcuts currently unavailable
+// Pad shortcuts are in addition to the keyboard shortcut
+// Possible buttons are "Up", "Down", "Left", "Right",
+// "StickUp", "StickDown", "StickLeft", "StickRight",
+// "PadUp", "PadDown", "PadLeft", "PadRight",
+// "Action"/"Triangle", "Weapon"/"Square", "Attack"/"Circle",
+// "Crouch"/"Cross"/"X", "Start", "Select"/"Back",
+// "LockOn"/"L1", "FirstPerson"/"R1", "ItemMenu","L2",
+// "WeaponMenu"/"R2", "LeftStick"/"L3", "RightStick"/"R3"
+//////////////////////////////////////////////////////////
 [
   {
-    "name": "btnUnlockEquips",
+    "name": "UnlockEquips",
     "modifiers": [],
-    "key": "NumPad0"
+    "key": "NumPad0",
+    "pad": []
   },
   {
-    "name": "toggleAlert",
+    "name": "AlertToggle",
     "modifiers": [],
-    "key": "NumPad1"
+    "key": "NumPad7",
+    "pad": []
   },
   {
-    "name": "btnAlertOn",
+    "name": "AlertOn",
     "modifiers": [],
-    "key": "NumPad2"
+    "key": "NumPad8",
+    "pad": []
   },
   {
-    "name": "btnAlertOff",
+    "name": "AlertOff",
     "modifiers": [],
-    "key": "NumPad3"
+    "key": "NumPad9",
+    "pad": []
   },
   {
-    "name": "toggleCaution",
+    "name": "CautionToggle",
     "modifiers": [],
-    "key": "NumPad4"
+    "key": "NumPad4",
+    "pad": []
   },
   {
-    "name": "btnCautionOn",
+    "name": "CautionOn",
     "modifiers": [],
-    "key": "NumPad5"
+    "key": "NumPad5",
+    "pad": []
   },
   {
-    "name": "btnCautionOff",
+    "name": "CautionOff",
     "modifiers": [],
-    "key": "NumPad6"
+    "key": "NumPad6",
+    "pad": []
   },
   {
-    "name": "btnRestartRoom",
+    "name": "RestartRoom",
     "modifiers": [],
-    "key": "NumPad7"
+    "key": "NumPad1",
+    "pad": []
   },
   {
-    "name": "btnSuicide",
+    "name": "Suicide",
     "modifiers": [],
-    "key": "NumPad8"
+    "key": "NumPad2",
+    "pad": []
   },
   {
-    "name": "btnHealthFill",
+    "name": "HealthFill",
     "modifiers": [],
-    "key": "NumPad9"
+    "key": "NumPad3",
+    "pad": []
+  },
+
+  //////////////////////////////////////////////////////////
+  // Other buttons without default hotkeys
+  // Add a key (and optionally modifier/s) to enable them
+  //////////////////////////////////////////////////////////
+  {
+    "name": "UpdatePos",
+    "modifiers": [],
+    "key": null,
+    "pad": []
+  },
+  {
+    "name": "PosZToggle",
+    "modifiers": [],
+    "key": null,
+    "pad": []
+  },
+  {
+    "name": "PosZRecover",
+    "modifiers": [],
+    "key": null,
+    "pad": []
+  },
+
+  /////////////////////////////////////////////////////////
+  // Other functions
+  /////////////////////////////////////////////////////////
+  {
+    "name": "SaveState",
+    "modifiers": [],
+    "key": null,
+    "pad": []
+  },
+  {
+    "name": "LoadState",
+    "modifiers": [],
+    "key": null,
+    "pad": []
   },
 
   //////////////////////////////////////////////////////////
@@ -74,54 +134,64 @@
   //////////////////////////////////////////////////////////
   /*
   {
-    "name":      "weaponGroup1",
-    "modifiers": [  ],
-    "key":       "F1"
+    "name": "weaponGroup1",
+    "modifiers": [],
+    "key": "F1",
+    "pad": []
   },
   {
-    "name":      "weaponGroup2",
-    "modifiers": [  ],
-    "key":       "F2"
+    "name": "weaponGroup2",
+    "modifiers": [],
+    "key": "F2",
+    "pad": []
   },
   {
-    "name":      "weaponGroup3",
-    "modifiers": [  ],
-    "key":       "F3"
+    "name": "weaponGroup3",
+    "modifiers": [],
+    "key": "F3",
+    "pad": []
   },
   {
-    "name":      "weaponGroup4",
-    "modifiers": [  ],
-    "key":       "F4"
+    "name": "weaponGroup4",
+    "modifiers": [],
+    "key": "F4",
+    "pad": []
   },
   {
-    "name":      "weaponGroup5",
-    "modifiers": [  ],
-    "key":       "F5"
+    "name": "weaponGroup5",
+    "modifiers": [],
+    "key": "F5",
+    "pad": []
   },
   {
-    "name":      "weaponGroup6",
-    "modifiers": [  ],
-    "key":       "F6"
+    "name": "weaponGroup6",
+    "modifiers": [],
+    "key": "F6",
+    "pad": []
   },
   {
-    "name":      "weaponGroup7",
-    "modifiers": [  ],
-    "key":       "F7"
+    "name": "weaponGroup7",
+    "modifiers": [],
+    "key": "F7",
+    "pad": []
   },
   {
-    "name":      "weaponGroup8",
-    "modifiers": [  ],
-    "key":       "F8"
+    "name": "weaponGroup8",
+    "modifiers": [],
+    "key": "F8",
+    "pad": []
   },
   {
-    "name":      "weaponGroup9",
-    "modifiers": [  ],
-    "key":       "F9"
+    "name": "weaponGroup9",
+    "modifiers": [],
+    "key": "F9",
+    "pad": []
   },
   {
-    "name":      "weaponGroup0",
-    "modifiers": [  ],
-    "key":       "F10"
+    "name": "weaponGroup0",
+    "modifiers": [],
+    "key": "F10",
+    "pad": []
   },
   */
 
@@ -129,6 +199,7 @@
   {
     "name": "end",
     "modifiers": [],
-    "key": null
+    "key": null,
+    "pad": []
   }
 ]

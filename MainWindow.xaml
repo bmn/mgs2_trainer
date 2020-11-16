@@ -5,17 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MGS2Trainer"
         mc:Ignorable="d"
-        Title="MGS2 Trainer" Height="468" Width="240" WindowStartupLocation="CenterScreen"
+        Title="MGS2 Trainer" Height="454" Width="240" WindowStartupLocation="CenterScreen"
         KeyUp="Window_KeyUp">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="158"/>
-            <RowDefinition Height="1*"/>
-            <RowDefinition Height="1*"/>
-            <RowDefinition Height="1*"/>
-            <RowDefinition Height="1*"/>
-            <RowDefinition Height="1*"/>
-            <RowDefinition Height="1*"/>
+            <RowDefinition Height="202"/>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="88"/>
         </Grid.RowDefinitions>
@@ -26,14 +20,17 @@
                 <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="3*"/>
+                <RowDefinition Height="4*"/>
                 <RowDefinition Height="2*"/>
                 <RowDefinition Height="3*"/>
                 <RowDefinition Height="3*"/>
                 <RowDefinition Height="3*"/>
                 <RowDefinition Height="3*"/>
                 <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
             </Grid.RowDefinitions>
+            <!--
             <Grid Grid.Row="0" Grid.ColumnSpan="3" ToolTip="The text shown below your life bar. Exit the area to take effect." Margin="0,0,0,2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="50"/>
@@ -47,6 +44,31 @@
                 </Button>
                 <TextBlock Text="Name:" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0"/>
                 <TextBox x:Name="txtName" Grid.Column="1" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="20"/>
+            </Grid>
+            -->
+            <TextBox x:Name="txtName" Visibility="Hidden"/>
+
+            <Grid Grid.Row="0" Grid.ColumnSpan="3" Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="22"/>
+                    <ColumnDefinition Width="22"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="3" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" x:Name="btnOpenAbout" ToolTip="About MGS2 Trainer" Click="btnOpenAbout_Click">
+                    <Button.Content>
+                        <Image Source="Resources\F1Help\F1Help_16x.png" Width="18" Margin="-4"/>
+                    </Button.Content>
+                </Button>
+                <TextBlock Text=">" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,3,1" FontWeight="Bold"/>
+                <TextBox x:Name="txtCLICommand" Grid.Column="1" KeyDown="txtCLICommand_KeyDown">
+                    <TextBox.ToolTip>
+                        <TextBlock x:Name="txtCLICommandToolTip" FontFamily="Consolas">
+                            Enter a CLI command or commands to run. Possible commands:
+                        </TextBlock>
+                    </TextBox.ToolTip>
+                </TextBox>
+                <Button Grid.Column="2" x:Name="btnRunCLICommand" ToolTip="Click or press Enter to run this command." Click="btnRunCLICommand_Click" Content="✔"/>
             </Grid>
             <TextBlock Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Bottom">Cur</TextBlock>
             <TextBlock Grid.Row="1" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Bottom">Max</TextBlock>
@@ -121,21 +143,52 @@
             <TextBox x:Name="txtItemMax" Grid.Row="3" Grid.Column="2" Text="{Binding ItemAmmoMax, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             <ComboBox x:Name="cmbProgress" Grid.Row="4" Grid.ColumnSpan="2" ItemsSource="{Binding ProgressNames.Values, Mode=OneWay}" SelectedIndex="{Binding ProgressCurrentInList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ToolTip="Game progress flag. This does not change your location."/>
             <TextBox x:Name="txtProgress" Grid.Row="4" Grid.Column="2" Text="{Binding ProgressCurrent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-            <ComboBox x:Name="cmbInitialState" Grid.Row="5" Grid.Column="0" ItemsSource="{Binding InitialStateAreas, Mode=OneWay}" SelectedIndex="{Binding InitialState, Mode=TwoWay}" ToolTip="Restore this area to its first-time-only state when reentering it."/>
+            
+            <ComboBox x:Name="cmbInitialState" Grid.Row="5" Grid.ColumnSpan="1" ItemsSource="{Binding InitialStateAreas, Mode=OneWay}" SelectedIndex="{Binding InitialState, Mode=TwoWay}" ToolTip="Modify the behaviour of an area, e.g. to restore first-time-only guards."/>
             <TextBlock Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" Text=" at initial state" VerticalAlignment="Center"/>
-            <TextBlock Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Text="Dog Tags always available" VerticalAlignment="Center" HorizontalAlignment="Right" ToolTip="Restore the uncollected state of all dog tags when reentering an area."/>
-            <CheckBox x:Name="chkLockDogTags" Grid.Row="6" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" IsChecked="{Binding LockDogTags, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <ComboBox x:Name="cmbDifficulty" Grid.Row="6" ItemsSource="{Binding Difficulties, Mode=OneWay}" SelectedIndex="{Binding DifficultyCurrent, Mode=TwoWay}" ToolTip="Change the current difficulty. This will not change other aspects of the game such as health and ammo."/>
+            <TextBlock Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Text=" difficulty" VerticalAlignment="Center"/>
+
+            <TextBlock Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Text="Dog Tags always available" VerticalAlignment="Center" HorizontalAlignment="Right" ToolTip="Restore the uncollected state of all dog tags when reentering an area."/>
+            <CheckBox x:Name="chkLockDogTags" Grid.Row="7" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" IsChecked="{Binding LockDogTags, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            <TextBlock Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Text="Boss Practice mode" VerticalAlignment="Center" HorizontalAlignment="Right" ToolTip="Restart Area automatically when a boss is defeated."/>
+            <CheckBox x:Name="chkBossPractice" Grid.Row="8" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" IsChecked="{Binding BossPractice, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MouseRightButtonUp="chkBossPractice_RightClick"/>
 
         </Grid>
-        <Button x:Name="btnUnlockEquips" Content="Unlock All Equips" Grid.Row="1" Click="btnUnlockEquips_Click" MouseRightButtonUp="btnUnlockEquips_RightClick" ToolTip="Right click to unlock all equips regardless of character."/>
-        <Button x:Name="btnAlertOn" Content="Alert On" Grid.Row="2" Click="btnAlertOn_Click"/><!-- MouseRightButtonUp="btnAlertOn_RightClick"/>-->
-        <Button x:Name="btnAlertOff" Content="Alert Off" Grid.Row="3" Click="btnAlertOff_Click"/>
-        <!-- MouseRightButtonUp="btnAlertOff_RightClick"/>-->
-        <Button x:Name="btnCautionOn" Content="Caution On (60 secs)" Grid.Row="4" Click="btnCautionOn_Click" MouseRightButtonUp="btnCautionOn_RightClick" ToolTip="Right click to change duration."/>
-        <Button x:Name="btnCautionOff" Content="Caution Off" Grid.Row="5" Click="btnCautionOff_Click"/>
-        <!-- MouseRightButtonUp="btnUnlockOff_RightClick"/>-->
-        <Button x:Name="btnSuicide" Content="Suicide" Grid.Row="6" Click="btnSuicide_Click"/>
-        <Button x:Name="btnHealthFill" Content="Full Health" Grid.Row="7" Click="btnHealthFill_Click"/>
+        <Grid Grid.Row="1" Margin="4,10,4,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
+            
+            <TextBlock Grid.Row="0" Text="Alert" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <Button x:Name="btnAlertToggle" Content="Toggle" Grid.Row="0" Grid.Column="1" Click="btnAlertToggle_Click"/>
+            <Button x:Name="btnAlertOn" Content="On" Grid.Row="0" Grid.Column="2" Click="btnAlertOn_Click"/>
+            <!-- MouseRightButtonUp="btnAlertOn_RightClick"/>-->
+            <Button x:Name="btnAlertOff" Content="Off" Grid.Row="0" Grid.Column="3" Click="btnAlertOff_Click"/>
+            <!-- MouseRightButtonUp="btnAlertOff_RightClick"/>-->
+            
+            <TextBlock Grid.Row="1" Text="Caution" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <Button x:Name="btnCautionToggle" Content="Toggle" Grid.Row="1" Grid.Column="1" Click="btnCautionToggle_Click"/>
+            <Button x:Name="btnCautionOn" Content="60 secs" Grid.Row="1" Grid.Column="2" Click="btnCautionOn_Click" MouseRightButtonUp="btnCautionOn_RightClick" ToolTip="Right click to change duration."/>
+            <Button x:Name="btnCautionOff" Content="Off" Grid.Row="1" Grid.Column="3" Click="btnCautionOff_Click"/>
+            <!-- MouseRightButtonUp="btnUnlockOff_RightClick"/>-->
+            
+            <Button x:Name="btnRestartRoom" Content="Restart Area" Grid.Row="2" Grid.ColumnSpan="2" Click="btnRestartRoom_Click"/>
+            <Button x:Name="btnSuicide" Content="Suicide" Grid.Row="2" Grid.Column="2" Click="btnSuicide_Click"/>
+            <Button x:Name="btnHealthFill" Content="Fill Life" Grid.Row="2" Grid.Column="3" Click="btnHealthFill_Click" MouseRightButtonUp="btnHealthFill_RightClick"/>
+
+            <Button x:Name="btnUnlockEquips" Content="Unlock All Equips" Grid.Row="3" Grid.ColumnSpan="4" Click="btnUnlockEquips_Click" MouseRightButtonUp="btnUnlockEquips_RightClick" ToolTip="Right click to unlock all equips regardless of character."/>
+        </Grid>
         <Grid Grid.Row="8" Margin="4">
             <Grid.RowDefinitions>
                 <RowDefinition Height="1*"/>
@@ -152,9 +205,9 @@
                 <ColumnDefinition Width="1*" />
                 <!--<ColumnDefinition Width="1*" />-->
             </Grid.ColumnDefinitions>
-            <TextBlock x:Name="txtPosXDisplay" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding PositionX, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ToolTip="X Position (Left/Right). Higher values are further right." TextTrimming="CharacterEllipsis"/>
-            <TextBlock x:Name="txtPosYDisplay" Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Text="{Binding PositionY, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ToolTip="Y Position (Forward/Back). Higher values are further forward." TextTrimming="CharacterEllipsis"/>
-            <TextBlock x:Name="txtPosZDisplay" Grid.Row="0" Grid.Column="4" Grid.ColumnSpan="2" Text="{Binding PositionZ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ToolTip="Z Position (Up/Down). Higher values are further down." TextTrimming="CharacterEllipsis"/>
+            <TextBlock x:Name="txtPosXDisplay" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding PositionX, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, StringFormat=X {0}}" ToolTip="X Position (Left/Right). Higher values are further right." TextTrimming="CharacterEllipsis"/>
+            <TextBlock x:Name="txtPosYDisplay" Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Text="{Binding PositionY, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, StringFormat=Y {0}}" ToolTip="Y Position (Forward/Back). Higher values are further forward." TextTrimming="CharacterEllipsis"/>
+            <TextBlock x:Name="txtPosZDisplay" Grid.Row="0" Grid.Column="4" Grid.ColumnSpan="2" Text="{Binding PositionZ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, StringFormat=Z {0}}" ToolTip="Z Position (Up/Down). Higher values are further down." TextTrimming="CharacterEllipsis"/>
 
             <CheckBox x:Name="chkPosXLock" Grid.Row="1" Grid.Column="0" Checked="chkPosXLock_Checked" Unchecked="chkPosXLock_Unchecked" ToolTip="Enable typing in a new X position."/>
             <TextBox x:Name="txtPosX" Grid.Row="1" Grid.Column="1" ToolTip="X position to move to."/>
