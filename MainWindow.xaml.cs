@@ -6,7 +6,6 @@ using System.IO;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -29,6 +28,10 @@ using CommandLine;
 using CommandLine.Text;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
+using Newtonsoft.Json.Linq;
+using System.Threading;
+using System.Timers;
+using Timer = System.Timers.Timer;
 
 namespace MGS2Trainer
 {
@@ -51,33 +54,73 @@ namespace MGS2Trainer
         private Trainer Train { get; set; }
         private Timer Timeout { get; set; }
         private Timer TimeoutPos { get; set; }
+        private Timer TimeoutHiRes { get; set; }
 
-        public MainWindow(App app)
+
+        public ICommand LoadWarpsProfileCommand { get; internal set; }
+
+        public bool HotkeysEnabled
+        {
+            get
+            {
+                return HotkeyManager.Current.IsEnabled;
+            }
+            set
+            {
+                HotkeyManager.Current.IsEnabled = value;
+            }
+        }
+
+        public MainWindow(App app, Trainer t)
         {
             ToolTipService.ShowDurationProperty.OverrideMetadata(typeof(DependencyObject), new FrameworkPropertyMetadata(Int32.MaxValue));
 
             Application = app;
 
-            Train = new Trainer();
+            Train = t;
             DataContext = Train;
+
+            Train.SetSelectedWarpGroup("Tanker");
 
             Closed += new EventHandler(Window_Closed);
             InitializeComponent();
 
+            btnContent = new Dictionary<string, Button>()
+            {
+                { "RestartRoom", btnRestartRoom },
+                { "Suicide", btnSuicide },
+                { "HealthFill", btnHealthFill },
+                { "CautionToggle", btnCautionToggle },
+                { "CautionOff", btnCautionOff },
+                { "CautionOn", btnCautionOn },
+                { "AlertToggle", btnAlertToggle },
+                { "AlertOff", btnAlertOff },
+                { "AlertOn", btnAlertOn },
+                { "UnlockEquips", btnUnlockEquips },
+                { "UpdatePos", btnUpdatePos },
+                { "PosZToggle", btnPosZToggle },
+                { "PosZRecover", btnPosZRecover }
+            };
+
             RegisterHotKeys();
 
+            txtWeaponCurrent.ValueChanged += SetWeaponCurrent;
+            txtWeaponMax.ValueChanged += SetWeaponMax;
             txtWeaponCurrent.KeyUp += SetWeaponCurrent;
             txtWeaponMax.KeyUp += SetWeaponMax;
 
+            txtItemCurrent.ValueChanged += SetItemCurrent;
             txtItemCurrent.KeyUp += SetItemCurrent;
+            txtItemMax.ValueChanged += SetItemMax;
             txtItemMax.KeyUp += SetItemMax;
 
             cmbProgress.SelectionChanged += SetProgress;
+            txtProgress.ValueChanged += SetProgress;
             txtProgress.KeyUp += SetProgress;
 
             txtName.KeyUp += SetName;
 
-            cmbDifficulty.SelectionChanged += SetDifficulty;
+            //cmbDifficulty.SelectionChanged += SetDifficulty;
 
             Timeout = new Timer(1000);
             Timeout.Elapsed += UpdateValues;
@@ -86,6 +129,10 @@ namespace MGS2Trainer
             TimeoutPos = new Timer(100);
             TimeoutPos.Elapsed += UpdateDeltaMovement;
             TimeoutPos.Enabled = true;
+
+            TimeoutHiRes = new Timer(16);
+            TimeoutHiRes.Elapsed += PollPadHotkeys;
+            TimeoutHiRes.Enabled = true;
 
             var commandHelp = new List<string>();
             var commandProps = typeof(CommandOptions).GetProperties();
@@ -96,13 +143,22 @@ namespace MGS2Trainer
                 string left = txt.Substring(0, pos);
                 string right = txt.Substring(pos + 4);
 
-                commandHelp.Add(left.PadRight(20) + right);
+                commandHelp.Add(left.PadRight(33) + right);
             }
-            txtCLICommandToolTip.Text += Environment.NewLine + string.Join(Environment.NewLine, commandHelp); 
+            txtCLICommandToolTip.Text = txtCLICommandToolTip.Text.Replace("\\n", Environment.NewLine) + Environment.NewLine + string.Join(Environment.NewLine, commandHelp);
+
+            CountAreaMods();
+
+            LoadWarpsProfileCommand = new RelayCommand(new Action<object>(LoadWarpsProfile));
         }
 
         private void btnRunCLICommand_Click(object sender, RoutedEventArgs e) => RunCLICommand(txtCLICommand.Text);
         private void RunCLICommand(string command) {
+            if (!command.TrimStart().StartsWith("--"))
+            {
+                command = "--" + command;
+            }
+
             string cmd = "command " + command;
             string[] cmds = CommandLineParser.SplitCommandLineIntoArguments(cmd, true).ToArray<string>();
             Application.ParseOptions(cmds);
@@ -136,24 +192,71 @@ namespace MGS2Trainer
             }
         }
 
-        private JsonElement GetHotkeyData(HotkeyEventArgs e)
+        private JsonElement GetHotkeyData(string name)
         {
-            if (HotkeyData.ContainsKey(e.Name))
+            if (HotkeyData.ContainsKey(name))
             {
-                return HotkeyData[e.Name];
+                return HotkeyData[name];
             }
             return new JsonElement();
         }
 
         public Dictionary<string, JsonElement> HotkeyData = new Dictionary<string, JsonElement>();
         public Dictionary<string, int> HotkeyCounter = new Dictionary<string, int>();
+        public ContinueState cdata;
         private void RegisterHotKeys()
         {
             // todo remove button lambdas and roll into button defs
-            var lambdas = new Dictionary<string, EventHandler<HotkeyEventArgs>>()
+            var lambdas = new Dictionary<string, EventHandler<string>>()
             {
+                { "SaveContinue", (sender, e) => {
+                    //Train.Test();
+                    cdata = Train.ContinueData;
+                    int mode = 4;
+                    if (mode == 0)
+                    {
+                        Clipboard.SetText(
+                            @"{ """", new ContinueState(""" + Convert.ToBase64String(cdata.Data1) + @""", """ +
+                            Convert.ToBase64String(cdata.Data2) + @""") }," + "\n"
+                        );
+                    }
+                    else if (mode == 1)
+                    {
+                        Clipboard.SetText(
+                            Convert.ToBase64String(cdata.Data1)
+                            + "\n" +
+                            Convert.ToBase64String(cdata.Data2)
+                        );
+                    }
+                    else if (mode == 2)
+                    {
+                        Clipboard.SetText(
+                            BitConverter.ToString(cdata.Data1).Replace("-","") +
+                            BitConverter.ToString(cdata.Data2).Replace("-","")
+                        );
+                    }
+                    else if (mode == 3)
+                    {
+                        Clipboard.SetText(BitConverter.ToString(cdata.Data2).Replace("-",""));
+                        Thread.Sleep(500);
+                        Clipboard.SetText(BitConverter.ToString(cdata.Data1).Replace("-",""));
+                    }
+                    else if (mode == 4)
+                    {
+                        Clipboard.SetText(
+                            "31323334000000000000000000000000" +
+                            BitConverter.ToString(cdata.Data1).Replace("-","") +
+                            BitConverter.ToString(cdata.Data2).Replace("-","")
+                        );
+                    }
+                } },
+                { "LoadContinue", (sender, e) => {
+                    Train.ContinueData = cdata;
+                    Train.DoRestartRoom();
+                } },
                 { "SaveState", (sender, e) => State.SaveState() },
                 { "LoadState", (sender, e) => State.LoadState() },
+                { "ResetGame", (sender, e) => Train.DoResetGame() },
                 { "SetProgress", (sender, e) => {
                     var d = GetHotkeyData(e);
                     if (d.ValueKind == JsonValueKind.Number) {
@@ -162,9 +265,9 @@ namespace MGS2Trainer
                     }
                     else if (d.ValueKind == JsonValueKind.Array)
                     {
-                        if (!HotkeyCounter.ContainsKey(e.Name))
+                        if (!HotkeyCounter.ContainsKey(e))
                         {
-                            HotkeyCounter[e.Name] = 0;
+                            HotkeyCounter[e] = 0;
                         }
                         var vals = new List<short>();
                         foreach (var k in d.EnumerateArray())
@@ -175,12 +278,20 @@ namespace MGS2Trainer
                                 vals.Add(l);
                             }
                         }
-                        Train.SetProgress((short)(vals[HotkeyCounter[e.Name] % vals.Count]));
-                        HotkeyCounter[e.Name]++;
+                        Train.SetProgress((short)(vals[HotkeyCounter[e] % vals.Count]));
+                        HotkeyCounter[e]++;
                     }
                     else
                     {
                         Train.SetProgress((short)(Train.ProgressCurrent + 1));
+                    }
+                } },
+                { "RunCommand", (sender, e) => {
+                    var d = GetHotkeyData(e);
+                    if (d.ValueKind == JsonValueKind.String)
+                    {
+                        string v = d.GetString();
+                        RunCLICommand(v);
                     }
                 } }
             };
@@ -195,23 +306,6 @@ namespace MGS2Trainer
                 lambdas.Add($"weapon{i}", (sender, e) => { Train.SwitchWeapon(copy); });
             }
 
-            var btnContent = new Dictionary<string, Button>()
-            {
-                { "RestartRoom", btnRestartRoom },
-                { "Suicide", btnSuicide },
-                { "HealthFill", btnHealthFill },
-                { "CautionToggle", btnCautionToggle },
-                { "CautionOff", btnCautionOff },
-                { "CautionOn", btnCautionOn },
-                { "AlertToggle", btnAlertToggle },
-                { "AlertOff", btnAlertOff },
-                { "AlertOn", btnAlertOn },
-                { "UnlockEquips", btnUnlockEquips },
-                { "UpdatePos", btnUpdatePos },
-                { "PosZToggle", btnPosZToggle },
-                { "PosZRecover", btnPosZRecover }
-            };
-
             string filename = Path.Combine(Directory.GetCurrentDirectory(), "HotKeys.json");
 
             string json = (File.Exists(filename)) ?
@@ -221,16 +315,21 @@ namespace MGS2Trainer
             {
                 PropertyNameCaseInsensitive = true,
                 ReadCommentHandling = JsonCommentHandling.Skip,
-                
+
             });
 
             RoutedEventArgs eventArgs = new RoutedEventArgs(Button.ClickEvent);
 
-            var padMask = new Dictionary<string, int>
+            var padMask = new Dictionary<string, uint>
             {
-                { "up", 0x1000 }, { "stickup", 0x1000 },
-                { "down", 0x4000 }, { "stickdown", 0x4000 },
-                { "left", 0x8000 }, { "stickleft", 0x8000 },
+                { "up", 0x1000 }, { "stickup", 0xF0001000 }, { "padup", 0xE1001000 },
+                { "right", 0x2000 }, { "stickright", 0xF0002000 }, { "padright", 0xD2002000 },
+                { "down", 0x4000 }, { "stickdown", 0xF0004000 }, { "paddown", 0xB4004000 },
+                { "left", 0x8000 }, { "stickleft", 0xF0008000 }, { "padleft", 0x78008000 },
+                { "rstickup", 0x100000 },
+                { "rstickright", 0x200000 },
+                { "rstickdown", 0x400000 },
+                { "rstickleft", 0x800000 },
                 { "action", 0x10 }, { "triangle", 0x10 },
                 { "punch", 0x20 }, { "circle", 0x20 },
                 { "crouch", 0x40 }, { "cross", 0x40 }, { "x", 0x40 },
@@ -265,7 +364,7 @@ namespace MGS2Trainer
                         {
                             string name = key.Name + j++;
                             HotkeyData.Add(name, key.Data);
-                            HotkeyManager.Current.AddOrReplace(name, hotkey, modkey, lambdas[key.Name]);
+                            HotkeyManager.Current.AddOrReplace(name, hotkey, modkey, (sender, e) => lambdas[key.Name].Invoke(sender, e.Name));
                         }
 
                         else if (btnContent.ContainsKey(key.Name))
@@ -282,9 +381,37 @@ namespace MGS2Trainer
                             btn.ToolTip = $"[{hotkeyname}{key.Key}]{btn.ToolTip}";
                         }
                     }
-                    if (key.Pad.Length > 0)
-                    {
 
+                    int padLength = key.Pad.Length;
+                    if (padLength > 0)
+                    {
+                        uint sig = 0;
+                        foreach (string k in key.Pad)
+                        {
+                            string l = k.ToLowerInvariant();
+                            if (padMask.ContainsKey(l))
+                            {
+                                sig += padMask[l];
+                            }
+                        }
+                        if (lambdas.ContainsKey(key.Name))
+                        {
+                            string name = key.Name + j++;
+                            HotkeyData.Add(name, key.Data);
+                            PadHotkeys.Add(new Tuple<uint, string, EventHandler<string>>(sig, name, (sender, e) => lambdas[key.Name].Invoke(sender, e)));
+                            // lambdas[key.Name]
+                        }
+                        else if (btnContent.ContainsKey(key.Name))
+                        {
+                            var btn = btnContent[key.Name];
+                            PadHotkeys.Add(new Tuple<uint, string, EventHandler<string>>(sig, key.Name, (sender, e) =>
+                            {
+                                this.Dispatcher.Invoke(() =>
+                                {
+                                    btn.RaiseEvent(eventArgs);
+                                });
+                            }));
+                        }
                     }
                 }
                 catch (HotkeyAlreadyRegisteredException)
@@ -292,6 +419,33 @@ namespace MGS2Trainer
                     //MessageBox.Show("Failed to register at least one global hotkey.");
                 }
             }
+        }
+        private List<Tuple<uint, string, EventHandler<string>>> PadHotkeys = new List<Tuple<uint, string, EventHandler<string>>>();
+        private Dictionary<string, Button> btnContent;
+
+        uint PrevPadInput;
+        private void PollPadHotkeys(object sender, ElapsedEventArgs e)
+        {
+            if ((!HotkeysEnabled) || (PadHotkeys.Count == 0))
+            {
+                return;
+            }
+            uint input = Train.PadInput;
+            foreach (var hk in PadHotkeys)
+            {
+                uint key = hk.Item1;
+                if (((PrevPadInput & key) == key) && ((input & key) != key))
+                {
+                    string name = hk.Item2;
+                    EventHandler<string> lambda = hk.Item3;
+
+                    PrevPadInput = input;
+                    lambda.Invoke(this, name);
+                    return;
+                }
+            }
+            PrevPadInput = input;
+
         }
 
         void Window_Closed(object sender, EventArgs e)
@@ -362,7 +516,7 @@ namespace MGS2Trainer
                     }
                     else if (PosZEnableNextFrame)
                     {
-                        
+
                         PosZEnableNextFrame = false;
                         Train.EnableZMovement();
                     }
@@ -390,7 +544,7 @@ namespace MGS2Trainer
 
         private void btnAlertOn_Click(object sender, RoutedEventArgs e) => btnAlertOn_Click();
         private void btnAlertOn_Click() => Train.SetAlertOn();
-        
+
         private void btnAlertOff_Click(object sender, RoutedEventArgs e) => btnAlertOff_Click();
         private void btnAlertOff_Click() => Train.SetAlertOff();
 
@@ -450,9 +604,9 @@ namespace MGS2Trainer
 
         private void SetProgress(object sender, SelectionChangedEventArgs e) => Train.SetProgress(true);
 
-        private void SetProgress(object sender, KeyEventArgs e) => Train.SetProgress(false);
+        private void SetProgress(object sender, RoutedEventArgs e) => Train.SetProgress(false);
 
-        private void SetDifficulty(object sender, SelectionChangedEventArgs e) => Train.SetDifficulty((byte)cmbDifficulty.SelectedIndex);
+        //private void SetDifficulty(object sender, SelectionChangedEventArgs e) => Train.SetDifficulty((byte)cmbDifficulty.SelectedIndex);
 
         private void SetName(object sender, KeyEventArgs e) => Train.SetName();
 
@@ -516,6 +670,66 @@ namespace MGS2Trainer
         private void sldPosDelta_DoubleClick(object sender, MouseButtonEventArgs e) => ((Slider)sender).Value = 0;
 
         private void chkBossPractice_RightClick(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void btnRadarToggle_Click(object sender, RoutedEventArgs e) => Train.ToggleRadar();
+        private void btnEquipModeToggle_Click(object sender, RoutedEventArgs e) => Train.ToggleEquipMode();
+        private void btnDifficultyToggle_Click(object sender, RoutedEventArgs e) => Train.ToggleDifficulty();
+        private void btnPracticeModeToggle_Click(object sender, RoutedEventArgs e) => Train.TogglePracticeMode();
+        private void btnRoomModToggle_Click(object sender, RoutedEventArgs e) => Train.ToggleRoomMods();
+        private void btnHotkeyToggle_Click(object sender, RoutedEventArgs e) => HotkeysEnabled ^= true;
+        private void btnRestartRoom_RightClick(object sender, MouseButtonEventArgs e) => Train.DoResetGame();
+
+        private void btnContinueRoomSettings_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("The Warps feature is a work in progress. This will be available in a later update.");
+        }
+
+        private void btnContinueProfile_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("The Warps feature is a work in progress. This will be available in a later update.");
+        }
+
+        private void btnContinueRoom_Click(object sender, RoutedEventArgs e)
+        {
+            //Train.ApplySelectedContinueState();
+            Train.ApplySelectedWarp();
+            Train.DoRestartRoom();
+        }
+
+
+        private void cmbContinueStateRoom_Changed(object sender, SelectionChangedEventArgs e)
+        {
+            //Train.UpdateContinueStateRoomVariants();
+            Train.UpdateWarpEntries();
+        }
+
+        private void LoadWarpsProfile(object sender/*, ExecutedRoutedEventArgs e*/)
+        {
+            Train.SetSelectedWarpGroup(sender as string);
+        }
+        private void LoadWarpsProfile_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
+
+
+
+
+        private void cmbInitialState_ItemSelectionChanged(object sender, Xceed.Wpf.Toolkit.Primitives.ItemSelectionChangedEventArgs e) => CountAreaMods();
+        private void CountAreaMods()
+        {
+            int count = Train.SelectedAreaMods.Count();
+            if (count != 1)
+            {
+                cmbInitialState.Text = "Area Modifications: " + count +" selected";
+            }
+            Train.TriggerOnPropertyChanged("SelectedAreaMods");
+        }
+
+        private void ContextMenu_TargetUpdated(object sender, DataTransferEventArgs e)
         {
 
         }

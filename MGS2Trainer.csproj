@@ -78,9 +78,15 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>snake.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="CommandLine, Version=2.8.0.0, Culture=neutral, PublicKeyToken=5a870481e358d379, processorArchitecture=MSIL">
       <HintPath>packages\CommandLineParser.2.8.0\lib\net461\CommandLine.dll</HintPath>
+    </Reference>
+    <Reference Include="CommonServiceLocator, Version=2.0.2.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
+      <HintPath>packages\CommonServiceLocator.2.0.2\lib\net47\CommonServiceLocator.dll</HintPath>
     </Reference>
     <Reference Include="Costura, Version=4.1.0.0, Culture=neutral, PublicKeyToken=9919ef960d84173d, processorArchitecture=MSIL">
       <HintPath>packages\Costura.Fody.4.1.0\lib\net40\Costura.dll</HintPath>
@@ -99,6 +105,9 @@
     </Reference>
     <Reference Include="Microsoft.CodeAnalysis, Version=3.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.CodeAnalysis.Common.3.7.0\lib\netstandard2.0\Microsoft.CodeAnalysis.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="NHotkey, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a76ffb086700b11c, processorArchitecture=MSIL">
       <HintPath>packages\NHotkey.2.1.0\lib\net45\NHotkey.dll</HintPath>
@@ -154,6 +163,21 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="Xceed.Wpf.AvalonDock, Version=4.0.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <HintPath>packages\Extended.Wpf.Toolkit.4.0.2\lib\net40\Xceed.Wpf.AvalonDock.dll</HintPath>
+    </Reference>
+    <Reference Include="Xceed.Wpf.AvalonDock.Themes.Aero, Version=4.0.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <HintPath>packages\Extended.Wpf.Toolkit.4.0.2\lib\net40\Xceed.Wpf.AvalonDock.Themes.Aero.dll</HintPath>
+    </Reference>
+    <Reference Include="Xceed.Wpf.AvalonDock.Themes.Metro, Version=4.0.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <HintPath>packages\Extended.Wpf.Toolkit.4.0.2\lib\net40\Xceed.Wpf.AvalonDock.Themes.Metro.dll</HintPath>
+    </Reference>
+    <Reference Include="Xceed.Wpf.AvalonDock.Themes.VS2010, Version=4.0.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <HintPath>packages\Extended.Wpf.Toolkit.4.0.2\lib\net40\Xceed.Wpf.AvalonDock.Themes.VS2010.dll</HintPath>
+    </Reference>
+    <Reference Include="Xceed.Wpf.Toolkit, Version=4.0.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <HintPath>packages\Extended.Wpf.Toolkit.4.0.2\lib\net40\Xceed.Wpf.Toolkit.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -163,15 +187,22 @@
     <Compile Include="AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="BindingConverter.cs" />
     <Compile Include="BuildInfo.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>BuildInfo.tt</DependentUpon>
     </Compile>
     <Compile Include="CLIOptions.cs" />
+    <Compile Include="IPSPatch.cs" />
+    <Compile Include="RelayCommand.cs" />
     <Compile Include="Trainer.cs" />
     <Compile Include="State.xaml.cs">
       <DependentUpon>State.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WarpConfig.cs" />
+    <Compile Include="WarpConfigWindow.xaml.cs">
+      <DependentUpon>WarpConfigWindow.xaml</DependentUpon>
     </Compile>
     <Page Include="AboutWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -195,6 +226,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="State.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WarpConfigWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -226,6 +261,15 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <EmbeddedResource Include="Resources\IPS\caution.ips" />
+    <EmbeddedResource Include="Resources\IPS\overlay.ips" />
+    <EmbeddedResource Include="Resources\IPS\drebin.ips" />
+    <EmbeddedResource Include="Resources\IPS\radar.ips" />
+    <EmbeddedResource Include="Resources\WarpProfiles\Plant %28early Shell 1%29.json" />
+    <EmbeddedResource Include="Resources\Warps\warps.bin" />
+    <EmbeddedResource Include="Resources\WarpProfiles\Tanker.json" />
+    <EmbeddedResource Include="Resources\IPS\1stperson.ips" />
+    <EmbeddedResource Include="Resources\WarpProfiles\Plant %28bomb disposal, clockwise%29.json" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -258,6 +302,7 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>BuildInfo.cs</LastGenOutput>
     </Content>
+    <Resource Include="snake.ico" />
     <Resource Include="Resources\F1Help\F1Help_16x.png" />
     <Content Include="Resources\F1Help\F1Help_16x.svg" />
   </ItemGroup>

@@ -1,32 +1,56 @@
 //////////////////////////////////////////////////////////
 // Shortcut definitions
 //////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////
+// Example block:
+// This runs the RestartRoom command
+// when you press Ctrl+Alt+R
+// or when you hold L1 and click the right stick
+//////////////////////////////////////////////////////////
+// {
+//   "name": "RestartRoom",
+//   "modifiers": ["Control", "Alt"],
+//   "key": "R",
+//   "pad": ["L1", "R3"]
+// },
+//////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////
+// If a shortcut is already taken by another program
+// it will not be available in this program.
+//////////////////////////////////////////////////////////
+// To disable a hotkey, set the key value to null
+// (without quotes) or remove that line.
+//////////////////////////////////////////////////////////
 // Possible modifiers are "Control", "Alt", "Shift".
 // You can add multiple modifiers, separated by commas.
 // e.g. ["Control", "Shift"]
 // Or delete the modifier (leaving the [ ] characters) to
-// have no modifier
+// have no modifier.
 //////////////////////////////////////////////////////////
 // The key code can be found by consulting this page:
 // https://docs.microsoft.com/en-us/dotnet/api/system.windows.forms.keys?view=netframework-4.7.2
 // The code to use is in the first column.
 //////////////////////////////////////////////////////////
-// If a shortcut is already taken by another program
-// it will not be available in this program
-//////////////////////////////////////////////////////////
-// To disable a hotkey, set the key value to null
-// (without quotes) or remove that line.
-//////////////////////////////////////////////////////////
-// Pad shortcuts currently unavailable
 // Pad shortcuts are in addition to the keyboard shortcut
-// Possible buttons are "Up", "Down", "Left", "Right",
-// "StickUp", "StickDown", "StickLeft", "StickRight",
-// "PadUp", "PadDown", "PadLeft", "PadRight",
+// Possible buttons are:
+// "Up", "Down", "Left", "Right", (match any directional input)
+// "StickUp", "StickDown", "StickLeft", "StickRight", (match only stick inputs)
+// "PadUp", "PadDown", "PadLeft", "PadRight", (match only pad input)
+// "RStickUp", "RStickDown", "RStickLeft", "RStickRight",
 // "Action"/"Triangle", "Weapon"/"Square", "Attack"/"Circle",
 // "Crouch"/"Cross"/"X", "Start", "Select"/"Back",
 // "LockOn"/"L1", "FirstPerson"/"R1", "ItemMenu","L2",
 // "WeaponMenu"/"R2", "LeftStick"/"L3", "RightStick"/"R3"
 //////////////////////////////////////////////////////////
+// You can add multiple hotkeys for the same function
+// by repeating the whole block.
+// Spacing is not important, you can fit a block onto
+// one line if you like, e.g.:
+// {"name":"RestartRoom","modifiers":["Control","Alt"],"key":"R","pad":["L1","R3"]},
+//////////////////////////////////////////////////////////
+
 [
   {
     "name": "UnlockEquips",
@@ -88,6 +112,12 @@
     "key": "NumPad3",
     "pad": []
   },
+  {
+    "name": "ResetGame",
+    "modifiers": [ "Control" ],
+    "key": "NumPad1",
+    "pad": [ "L1", "R1", "L2", "R2", "Start" ]
+  },
 
   //////////////////////////////////////////////////////////
   // Other buttons without default hotkeys
@@ -112,9 +142,33 @@
     "pad": []
   },
 
-  /////////////////////////////////////////////////////////
-  // Other functions
-  /////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////
+  // Continue state functions
+  // These functions are reliable, but may be changed in
+  // later versions.
+  // Save will store the current continue state in memory.
+  // Load will restore that state and trigger the continue.
+  //////////////////////////////////////////////////////////
+  {
+    "name": "SaveContinue",
+    "modifiers": [],
+    "key": null,
+    "pad": []
+  },
+  {
+    "name": "LoadContinue",
+    "modifiers": [],
+    "key": null,
+    "pad": []
+  },
+
+  //////////////////////////////////////////////////////////
+  // Save state functions
+  // These functions are borderline unusable, but are here
+  // because they exist and do have some small use.
+  // If you attempt to load a state after leaving that area,
+  // the game will almost certainly crash.
+  //////////////////////////////////////////////////////////
   {
     "name": "SaveState",
     "modifiers": [],
@@ -129,8 +183,32 @@
   },
 
   //////////////////////////////////////////////////////////
+  // Run a command (or set of commands)
+  // (hover over the text box at the top of the trainer for syntax)
+  // (you can repeat this block multiple times for different hotkeys/commands)
+  //////////////////////////////////////////////////////////
+  {
+    "name": "RunCommand",
+    "modifiers": [],
+    "key": null,
+    "pad": [],
+    "data": "--life-name MGSR"
+  },
+
+  //////////////////////////////////////////////////////////
+  // Loop through a set of progress values
+  //////////////////////////////////////////////////////////
+  {
+    "name": "SetProgress",
+    "modifiers": [],
+    "key": null,
+    "pad": [],
+    "data": [ 69, 420, 0 ]
+  },
+
+  //////////////////////////////////////////////////////////
   // Scroll through weapons from a particular group
-  // (commented out by default, remove the /* and */ below to enable)
+  // (commented out by default, remove the /* and */ to enable
   //////////////////////////////////////////////////////////
   /*
   {

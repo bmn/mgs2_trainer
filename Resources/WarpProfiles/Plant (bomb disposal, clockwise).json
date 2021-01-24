@@ -1,0 +1,85 @@
+﻿[
+
+  {
+    "name": "Strut C Dining Hall (after Stillman)",
+    "parent": [ "Strut C Dining Hall (before Stillman)" ],
+    "weapons": [ 1, -2, -1, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1 ],
+    "items": [ 1, 0, 0, 0, 0, 0, 0, 0, -3, 0, 1, 0, 0, 0, 1, -3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -3, 0, 0, -3, -3, -3, 0, 0 ],
+    "warps": [
+      {
+        "name": "after Stillman cutscene",
+        "location": "w16b-after"
+      },
+      {
+        "name": "BC connecting bridge",
+        "location": "w16b-w15b"
+      },
+      {
+        "name": "CD connecting bridge",
+        "location": "w16b-w17a"
+      },
+    ],
+  },
+
+  {
+    "name": "CD connecting bridge",
+  },
+
+  {
+    "name": "Strut D",
+  },
+
+  {
+    "name": "DE connecting bridge",
+  },
+
+  {
+    "name": "Strut E Parcel Room (with bomb)",
+  },
+
+  {
+    "name": "Strut E helipad",
+  },
+
+  {
+    "name": "Strut E Parcel Room (without bomb)",
+  },
+
+  {
+    "name": "EF connecting bridge",
+  },
+
+  {
+    "name": "Strut F warehouse",
+  },
+
+  {
+    "name": "FA connecting bridge",
+  },
+
+  {
+    "name": "Strut A Pump Room",
+  },
+
+  {
+    "name": "Strut A roof",
+  },
+
+  {
+    "name": "AB connecting bridge",
+  },
+
+  {
+    "name": "Strut B Transformer Room",
+  },
+
+  {
+    "name": "BC connecting bridge",
+  },
+
+  {
+    "name": "Strut C Dining Hall (Sensor B)",
+  },
+
+
+]

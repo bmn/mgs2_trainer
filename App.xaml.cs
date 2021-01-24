@@ -15,17 +15,20 @@ namespace MGS2Trainer
     public partial class App : Application
     {
         private bool EnableWindow { get; set; } = true;
+        private Trainer Train { get; set; }
 
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            Train = new Trainer();
 
             //CLIOptions Options = new CLIOptions();
             ParseOptions(e.Args);
 
             if (EnableWindow)
             {
-                new MainWindow(this).ShowDialog();
+                new MainWindow(this, Train).ShowDialog();
             }
 
             this.Shutdown();
@@ -41,8 +44,12 @@ namespace MGS2Trainer
         private void CommandExe(CommandOptions opts)
         {
             EnableWindow = false;
+            Trainer t = Train;
 
-            Trainer t = new Trainer();
+            if (opts.UnlockCast)
+            {
+                t.UnlockCastingTheaterCharacters();
+            }
             if (opts.VrScore != null)
             {
                 t.SetAllVrScores((uint)opts.VrScore);
@@ -64,17 +71,87 @@ namespace MGS2Trainer
                 t.SetProgress((short)opts.Progress);
             }
 
-            if ( (opts.Radar.Equals("on", StringComparison.InvariantCultureIgnoreCase)) || (opts.Radar == "1") )
+            if (opts.Radar != null)
             {
-                t.SetRadarOn();
+                if ((opts.Radar.Equals("on", StringComparison.InvariantCultureIgnoreCase)) || (opts.Radar == "1"))
+                {
+                    t.SetRadarOn();
+                }
+                else if ((opts.Radar.Equals("off", StringComparison.InvariantCultureIgnoreCase)) || (opts.Radar == "0"))
+                {
+                    t.SetRadarOff();
+                }
+                else if (opts.Radar.Equals("toggle", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    t.ToggleRadar();
+                }
             }
-            else if ((opts.Radar.Equals("off", StringComparison.InvariantCultureIgnoreCase)) || (opts.Radar == "0"))
+
+            if (opts.EquipMode != null)
             {
-                t.SetRadarOff();
+                if ((opts.EquipMode.Equals("previous", StringComparison.InvariantCultureIgnoreCase)) || (opts.EquipMode == "1"))
+                {
+                    t.SetEquipPrevious();
+                }
+                else if ((opts.EquipMode.Equals("unequip", StringComparison.InvariantCultureIgnoreCase)) || (opts.EquipMode == "0"))
+                {
+                    t.SetEquipUnequip();
+                }
+                else if (opts.EquipMode.Equals("toggle", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    t.ToggleEquipMode();
+                }
             }
-            else if (opts.Radar.Equals("toggle", StringComparison.InvariantCultureIgnoreCase))
+
+            if (opts.EnableGoid != null)
             {
-                t.ToggleRadar();
+                if ((opts.EnableGoid.Equals("on", StringComparison.InvariantCultureIgnoreCase)) || (opts.EquipMode == "1"))
+                {
+                    t.SetGOIDOn();
+                }
+                else if ((opts.EnableGoid.Equals("off", StringComparison.InvariantCultureIgnoreCase)) || (opts.EquipMode == "0"))
+                {
+                    t.SetGOIDOff();
+                }
+            }
+
+            if (opts.State != null)
+            {
+                if (opts.State.Equals("save", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    State.SaveState();
+                }
+                else if (opts.State.Equals("load", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    State.LoadState();
+                }
+            }
+
+            if (opts.PosX != null)
+            {
+                t.SetPositionX((float)opts.PosX);
+            }
+            if (opts.PosY != null)
+            {
+                t.SetPositionY((float)opts.PosY);
+            }
+            if (opts.PosZ != null)
+            {
+                t.SetPositionZ((float)opts.PosZ);
+            }
+
+            if (opts.Patch != null)
+            {
+                t.ApplyIPSPatch(opts.Patch);
+            }
+            if (opts.Unpatch != null)
+            {
+                t.RevertIPSPatch(opts.Unpatch);
+            }
+
+            if (opts.HostageHour != null)
+            {
+                t.SetHostageHour((int)opts.HostageHour);
             }
 
         }

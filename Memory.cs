@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 
 namespace MGS2Trainer
 {
-    class Memory : INotifyPropertyChanged
+    public class Memory : INotifyPropertyChanged
     {
         public MemorySharp GameProcess { get; set; }
         public string ProcessName { get; set; }
@@ -145,10 +145,12 @@ namespace MGS2Trainer
 
         public void SuspendProcess()
         {
+            RefreshProcess();
             GameProcess.Threads.SuspendAll();
         }
         public void ResumeProcess()
         {
+            RefreshProcess();
             GameProcess.Threads.ResumeAll();
         }
 

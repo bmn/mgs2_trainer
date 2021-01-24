@@ -14,7 +14,7 @@ namespace MGS2Trainer
 {
     public static class BuildInfo
     {
-        private const long              BUILD_DATE_BINARY_UTC       = 0x48d88912d41b4958;    // November 15, 2020 3:02:03.389986 AM UTC
+        private const long              BUILD_DATE_BINARY_UTC       = 0x48d8bc405078cbe7;    // January 19, 2021 6:06:08.694781 AM UTC
 
         private static AssemblyName     BuildAssemblyName { get; }  = Assembly.GetExecutingAssembly().GetName();
         public static DateTimeOffset    BuildDateUtc { get; }       = DateTime.FromBinary(BUILD_DATE_BINARY_UTC);
@@ -25,7 +25,7 @@ namespace MGS2Trainer
 #endif
                                                                                 ;
 
-        public static string            BuildDateText { get; }      = "15 November 2020 03:02:03 UTC";
+        public static string            BuildDateText { get; }      = "19 January 2021 06:06:08 UTC";
         public static string            DisplayText { get; }        = $"{ModuleText} {VersionText} (Build Date: {BuildDateText})";
     }
 }

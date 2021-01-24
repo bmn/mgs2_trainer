@@ -1,0 +1,538 @@
+/* to save even during timers: break at 47891c, switch eax to & 0x10 */
+
+/* TODO * profiles for Tanker, Plant clockwise, anticlockwise, conveyor AC, conveyor FB...    */
+/*      * new button to pop up menu to switch profile (and maybe set whether things like weapon changes are enabled) */
+
+/*
+  Tanker (only one profile needed?)
+  Plant to Stillman
+  Plant CW bomb disposal to Fortune
+  Plant ACW "
+  Plant AC conveyor "
+  Plant FA conveyor "
+  Plant Fortune to Harrier
+  Plant Harrier to Arsenal
+  Plant Arsenal
+*/
+[
+  {
+    "name": "Aft Deck (before Olga)",
+    "mode": "Tanker",
+    "weapons": [ 1, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 ],
+    "items": [ 1, 0, 0, 0, 0, 0, 0, 0, -3, 0, 0, 0, 0, 0, 0, -3, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -3, -3, 0, 0, 0, 0, 0, 0, 0 ],
+    "equip": [ 1, 0, 0, 0 ],
+    "warps": [
+      {
+        "name": "Tanker intro",
+        "location": "start-tanker",
+        "progress": 0
+      },
+      {
+        "name": "Game start",
+        "location": "w00a-start",
+        "progress": 14
+      },
+      {
+        "name": "Deck A, crew's quarters",
+        "parent": [ "Deck A crew's quarters (before Olga)" ],
+        "location": "w00a-w01a"
+      },
+      {
+        "name": "Deck B, crew's quarters",
+        "parent": [ "Deck A crew's quarters (before Olga)" ],
+        "location": "w00a-w01b"
+      }
+    ]
+  },
+
+  {
+    "name": "Deck A, crew's quarters (before Olga)",
+    "parent": [ "Aft Deck (before Olga)" ],
+    "progress": 15,
+    "warps": [
+      {
+        "name": "Aft Deck",
+        "location": "w01a-w00a"
+      },
+      {
+        "name": "Deck A, crew's lounge (starboard)",
+        "location": "w01a-w01f-sb"
+      },
+      {
+        "name": "Deck A, crew's lounge (port)",
+        "location": "w01a-w01f-pt"
+      }
+    ]
+  },
+
+  {
+    "name": "Deck A, crew's lounge (before Olga)",
+    "parent": [ "Deck A, crew's quarters (before Olga)" ],
+    "warps": [
+      {
+        "name": "Deck A, crew's quarters",
+        "location": "w01f-w01a"
+      },
+      {
+        "name": "Deck B, crew's quarters",
+        "location": "w01f-w01b"
+      },
+      {
+        "name": "Engine Room (starboard)",
+        "location": "w01f-w02a-sb"
+      },
+      {
+        "name": "Engine Room (port)",
+        "location": "w01f-w02a-pt"
+      }
+    ]
+  },
+
+  {
+    "name": "Engine Room (before Olga)",
+    "parent": [ "Deck A, crew's quarters (before Olga)" ],
+    "warps": [
+      {
+        "name": "Deck A, crew's lounge (starboard)",
+        "location": "w02a-w01f-sb"
+      },
+      {
+        "name": "Deck A, crew's lounge (port)",
+        "location": "w02a-w01f-pt"
+      },
+      {
+        "name": "Port side",
+        "location": "w02a-sensors"
+      }
+    ]
+  },
+
+
+  {
+    "name": "Deck B, crew's quarters (before Olga)",
+    "parent": [ "Deck A, crew's quarters (before Olga)" ],
+    "warps": [
+      {
+        "name": "Aft Deck",
+        "location": "w01b-w00a"
+      },
+      {
+        "name": "Deck A, crew's lounge",
+        "location": "w01b-w01f"
+      },
+      {
+        "name": "Deck C, crew's quarters",
+        "location": "w01b-w01c"
+      }
+    ]
+  },
+
+  {
+    "name": "Deck C, crew's quarters (before Olga)",
+    "parent": [ "Deck B, crew's quarters (before Olga)" ],
+    "warps": [
+      {
+        "name": "Deck B, crew's quarters",
+        "location": "w01c-w01b"
+      },
+      {
+        "name": "Deck D, crew's quarters",
+        "location": "w01c-w01d"
+      }
+    ]
+  },
+
+  {
+    "name": "Deck D, crew's quarters (before Olga)",
+    "parent": [ "Deck C, crew's quarters (before Olga)" ],
+    "warps": [
+      {
+        "name": "Deck C, crew's quarters",
+        "location": "w01d-w01c"
+      },
+      {
+        "name": "Deck E, the bridge",
+        "location": "w01d-w01e"
+      }
+    ]
+  },
+
+  {
+    "name": "Deck E, the bridge (before Olga)",
+    "parent": [ "Deck D, crew's quarters (before Olga)" ],
+    "progress": 16,
+    "warps": [
+      {
+        "name": "Deck D, crew's quarters",
+        "location": "w01e-w01d-before"
+      }
+    ]
+  },
+
+  {
+    "name": "vs Olga",
+    "parent": [ "Deck E, the bridge (before Olga)" ],
+    "warps": [
+      {
+        "name": "Opening cutscene",
+        "location": "w00b-before"
+      },
+      {
+        "name": "vs Olga",
+        "location": "w00b"
+      },
+      {
+        "name": "Closing cutscene", // TODO FIX
+        "location": "w00b-after",
+        "progress": 28
+      }
+    ]
+  },
+
+  {
+    "name": "Navigational Deck",
+    "parent": [ "vs Olga" ],
+    "progress": 29,
+    "weapons": [ null, null, -2, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null ],
+    "warps": [
+      {
+        "name": "after Olga",
+        "location": "w00c-w00b",
+        "weapons": [ null, null, 0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null ]
+      },
+      {
+        "name": "Deck E, the bridge (port)", // TODO FIX
+        "location": "w00c-w01e-pt"
+      },
+      {
+        "name": "Deck E, the bridge (starboard)", // TODO FIX
+        "location": "w00c-w01e-sb"
+      }
+    ]
+  },
+
+  {
+    "name": "Deck E, the bridge (after Olga)",
+    "parent": [ "Navigational Deck" ],
+    "equip": [ 2, 0, 1, 0 ],
+    "warps": [
+      {
+        "name": "Deck D, crew's quarters",
+        "location": "w01e-w01d"
+      },
+      {
+        "name": "Navigational Deck, port wing",
+        "location": "w01e-w00c-pt"
+      },
+      {
+        "name": "Navigational Deck, starboard wing",
+        "location": "w01e-w00c-sb"
+      }
+    ]
+  },
+
+  {
+    "name": "Deck D, crew's quarters (after Olga)",
+    "parent": [ "Deck E, the bridge (after Olga)" ],
+    "warps": [
+      {
+        "name": "Deck C, crew's quarters",
+        "location": "w01d-w01c"
+      },
+      {
+        "name": "Deck E, the bridge",
+        "location": "w01d-w01e"
+      }
+    ]
+  },
+
+  {
+    "name": "Deck C, crew's quarters (after Olga)",
+    "parent": [ "Deck D, crew's quarters (after Olga)" ],
+    "warps": [
+      {
+        "name": "Deck B, crew's quarters",
+        "location": "w01c-w01b"
+      },
+      {
+        "name": "Deck D, crew's quarters",
+        "location": "w01c-w01d"
+      }
+    ]
+  },
+
+  {
+    "name": "Deck B, crew's quarters (after Olga)",
+    "parent": [ "Deck C, crew's quarters (after Olga)" ],
+    "warps": [
+      {
+        "name": "Aft Deck",
+        "location": "w01b-w00a"
+      },
+      {
+        "name": "Deck A, crew's lounge",
+        "location": "w01b-w01f"
+      },
+      {
+        "name": "Deck C, crew's quarters",
+        "location": "w01b-w01c"
+      }
+    ]
+  },
+
+  {
+    "name": "Deck A, crew's lounge (after Olga)",
+    "parent": [ "Deck B, crew's quarters (after Olga)" ],
+    "warps": [
+      {
+        "name": "Deck A, crew's quarters",
+        "location": "w01f-w01a"
+      },
+      {
+        "name": "Deck B, crew's quarters",
+        "location": "w01f-w01b"
+      },
+      {
+        "name": "Engine Room (starboard)",
+        "location": "w01f-w02a-sb"
+      },
+      {
+        "name": "Engine Room (port)",
+        "location": "w01f-w02a-pt"
+      }
+    ]
+  },
+
+  {
+    "name": "Deck A, crew's quarters (after Olga)",
+    "parent": [ "Deck A, crew's lounge (after Olga)" ],
+    "warps": [
+      {
+        "name": "Aft Deck",
+        "location": "w01a-w00a",
+        "progress": 15
+      },
+      {
+        "name": "Deck A, crew's lounge (starboard)",
+        "location": "w01a-w01f-sb"
+      },
+      {
+        "name": "Deck A, crew's lounge (port)",
+        "location": "w01a-w01f-pt"
+      }
+    ]
+  },
+
+  {
+    "name": "Aft Deck (after Olga)",
+    "parent": [ "Deck A, crew's quarters (after Olga)" ],
+    "warps": [
+      {
+        "name": "Deck A, crew's quarters",
+        "location": "w00a-w01a"
+      },
+      {
+        "name": "Deck B, crew's quarters",
+        "location": "w00a-w01b"
+      }
+    ]
+  },
+
+
+  {
+    "name": "Engine Room (after Olga)",
+    "parent": [ "Deck A, crew's lounge (after Olga)" ],
+    "equip": [ null, null, null, 15 ],
+    "warps": [
+      {
+        "name": "Deck A, crew's lounge (starboard)",
+        "location": "w02a-w01f-sb"
+      },
+      {
+        "name": "Deck A, crew's lounge (port)",
+        "location": "w02a-w01f-pt"
+      },
+      {
+        "name": "Deck 2, port",
+        "location": "w02a-w03a",
+        "parent": [ "Deck 2, port" ]
+      },
+      {
+        "name": "Port side",
+        "location": "w02a-sensors"
+      }
+    ]
+  },
+
+  {
+    "name": "Deck 2, port",
+    "parent": [ "Engine Room (after Olga)" ],
+    "progress": 30,
+    "warps": [
+      {
+        "name": "Engine Room",
+        "location": "w03a-w02a"
+      },
+      {
+        "name": "Deck 2, starboard",
+        "location": "w03a-w03b"
+      }
+    ]
+  },
+
+  {
+    "name": "Deck 2, starboard",
+    "parent": [ "Deck 2, port" ],
+    "warps": [
+      {
+        "name": "Deck 2, port",
+        "location": "w03b-w03a"
+      }
+    ]
+  },
+
+  {
+    "name": "Guard Rush",
+    "parent": [ "Deck 2, starboard" ],
+    "warps": [
+      {
+        "name": "Opening cutscene",
+        "location": "w03b-before",
+        "progress": 31
+      },
+      {
+        "name": "Guard Rush", // TODO FIX
+        "location": "w03b",
+        "progress": 32
+      },
+      {
+        "name": "Closing cutscene",
+        "location": "w03b-after",
+        "progress": 33
+      }
+    ]
+  },
+
+  {
+    "name": "Hold No.1",
+    "parent": [ "Guard Rush" ],
+    "equip": [ 2, null, 1, null ],
+    "warps": [
+      {
+        "name": "Guard Rush",
+        "location": "w04a-w03b"
+      },
+      {
+        "name": "Hold No.2 (top left)",
+        "location": "w04a-w04b-tl"
+      },
+      {
+        "name": "Hold No.2 (top right)",
+        "location": "w04a-w04b-tr"
+      },
+      {
+        "name": "Hold No.2 (bottom left)",
+        "location": "w04a-w04b-bl"
+      },
+      {
+        "name": "Hold No.2 (bottom right)",
+        "location": "w04a-w04b-br"
+      }
+    ]
+  },
+
+  {
+    "name": "Hold No.2",
+    "parent": [ "Hold No.1" ],
+    "warps": [
+      {
+        "name": "Hold No.1 (top left)",
+        "location": "w04b-w04a-tl"
+      },
+      {
+        "name": "Hold No.1 (top right)",
+        "location": "w04b-w04a-tr"
+      },
+      {
+        "name": "Hold No.1 (bottom left)",
+        "location": "w04b-w04a-bl"
+      },
+      {
+        "name": "Hold No.1 (bottom right)",
+        "location": "w04b-w04a-br"
+      },
+      {
+        "name": "Hold No.3 (top left)",
+        "location": "w04b-w04c-tl"
+      },
+      {
+        "name": "Hold No.3 (top right)",
+        "location": "w04b-w04c-tr"
+      },
+      {
+        "name": "Hold No.3 (bottom left)",
+        "location": "w04b-w04c-bl"
+      },
+      {
+        "name": "Hold No.3 (bottom right)",
+        "location": "w04b-w04c-br"
+      },
+      {
+        "name": "Hold No.3 (vent)",
+        "location": "w04b-w04c-vt"
+      }
+    ]
+  },
+
+  {
+    "name": "Hold No.3",
+    "parent": [ "Hold No.2" ],
+    "warps": [
+      {
+        "name": "Hold No.2 (top left) after cutscene",
+        "location": "w04c-w04b-tl-cs"
+      },
+      {
+        "name": "Hold No.2 (top right) after cutscene",
+        "location": "w04c-w04b-tr-cs"
+      },
+      {
+        "name": "Hold No.2 (bottom left) after cutscene",
+        "location": "w04c-w04b-bl-cs",
+        "equip": [ null, 15, null, 0 ]
+      },
+      {
+        "name": "Hold No.2 (bottom right) after cutscene",
+        "location": "w04c-w04b-br-cs"
+      },
+      {
+        "name": "Hold No.2 (vent) after cutscene",
+        "location": "w04c-w04b-vt-cs"
+      },
+      {
+        "name": "Hold No.2 (top left)",
+        "location": "w04c-w04b-tl"
+      },
+      {
+        "name": "Hold No.2 (top right)",
+        "location": "w04c-w04b-tr"
+      },
+      {
+        "name": "Hold No.2 (bottom left)",
+        "location": "w04c-w04b-bl"
+      },
+      {
+        "name": "Hold No.2 (bottom right)",
+        "location": "w04c-w04b-br"
+      },
+      {
+        "name": "Hold No.2 (vent)",
+        "location": "w04c-w04b-vt"
+      },
+      {
+        "name": "Tanker ending",
+        "location": "end-tanker"
+      }
+    ]
+  },
+]

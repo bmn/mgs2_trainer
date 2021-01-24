@@ -4,14 +4,21 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MGS2Trainer"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="MGS2 Trainer" Height="454" Width="240" WindowStartupLocation="CenterScreen"
+        Title="MGS2 Trainer" SizeToContent="Height" Width="280" WindowStartupLocation="CenterScreen"
         KeyUp="Window_KeyUp">
+    <Window.Resources>
+        <local:DifficultyColorConverter x:Key="DifficultyColorConverter"/>
+        <local:DifficultyNameConverter x:Key="DifficultyNameConverter" />
+        <local:DiffNameConverter x:Key="DiffNameConverter" />
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="202"/>
-            <RowDefinition Height="1*"/>
-            <RowDefinition Height="88"/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid Grid.Row="0" Margin="4">
             <Grid.ColumnDefinitions>
@@ -21,31 +28,13 @@
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="4*"/>
+                <RowDefinition Height="8*"/>
                 <RowDefinition Height="2*"/>
                 <RowDefinition Height="3*"/>
                 <RowDefinition Height="3*"/>
                 <RowDefinition Height="3*"/>
                 <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
             </Grid.RowDefinitions>
-            <!--
-            <Grid Grid.Row="0" Grid.ColumnSpan="3" ToolTip="The text shown below your life bar. Exit the area to take effect." Margin="0,0,0,2">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="50"/>
-                    <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="22"/>
-                </Grid.ColumnDefinitions>
-                <Button Grid.Column="2" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" x:Name="btnOpenAbout" ToolTip="About MGS2 Trainer" Click="btnOpenAbout_Click">
-                    <Button.Content>
-                        <Image Source="Resources\F1Help\F1Help_16x.png" Width="18" Margin="-4"/>
-                    </Button.Content>
-                </Button>
-                <TextBlock Text="Name:" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                <TextBox x:Name="txtName" Grid.Column="1" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="20"/>
-            </Grid>
-            -->
             <TextBox x:Name="txtName" Visibility="Hidden"/>
 
             <Grid Grid.Row="0" Grid.ColumnSpan="3" Margin="0,0,0,10">
@@ -64,96 +53,57 @@
                 <TextBox x:Name="txtCLICommand" Grid.Column="1" KeyDown="txtCLICommand_KeyDown">
                     <TextBox.ToolTip>
                         <TextBlock x:Name="txtCLICommandToolTip" FontFamily="Consolas">
-                            Enter a CLI command or commands to run. Possible commands:
+                            Enter a CLI command or commands to run.\nYou can omit the -- prefix if there is only one command.\n\nPossible commands:
                         </TextBlock>
                     </TextBox.ToolTip>
                 </TextBox>
                 <Button Grid.Column="2" x:Name="btnRunCLICommand" ToolTip="Click or press Enter to run this command." Click="btnRunCLICommand_Click" Content="✔"/>
             </Grid>
-            <TextBlock Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Bottom">Cur</TextBlock>
-            <TextBlock Grid.Row="1" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Bottom">Max</TextBlock>
-            <ComboBox x:Name="cmbWeaponName" Grid.Row="2" Grid.Column="0" SelectedIndex="{Binding WeaponSelected, Mode=TwoWay}" ToolTip="Weapon ammo count. Set current to -1 to remove, or 1 to give a weapon without ammo.">
-                <ComboBoxItem Content="M9"/>
-                <ComboBoxItem Content="USP"/>
-                <ComboBoxItem Content="SOCOM"/>
-                <ComboBoxItem Content="PSG-1"/>
-                <ComboBoxItem Content="RGB6"/>
-                <ComboBoxItem Content="Nikita"/>
-                <ComboBoxItem Content="Stinger"/>
-                <ComboBoxItem Content="Claymore"/>
-                <ComboBoxItem Content="C4"/>
-                <ComboBoxItem Content="Chaff Grenade"/>
-                <ComboBoxItem Content="Stun Grenade"/>
-                <ComboBoxItem Content="D.Mic"/>
-                <ComboBoxItem Content="HF Blade"/>
-                <ComboBoxItem Content="Coolant"/>
-                <ComboBoxItem Content="AK-74u"/>
-                <ComboBoxItem Content="Magazine"/>
-                <ComboBoxItem Content="Grenade"/>
-                <ComboBoxItem Content="M4"/>
-                <ComboBoxItem Content="PSG-1T"/>
-                <ComboBoxItem Content="D.Mic (cutscene)"/>
-                <ComboBoxItem Content="Book"/>
-            </ComboBox>
-            <TextBox x:Name="txtWeaponCurrent" Grid.Row="2" Grid.Column="1" Text="{Binding WeaponAmmoCurrent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-            <TextBox x:Name="txtWeaponMax" Grid.Row="2" Grid.Column="2" Text="{Binding WeaponAmmoMax, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-            <ComboBox x:Name="cmbItemName" Grid.Row="3" Grid.Column="0"  SelectedIndex="{Binding ItemSelected, Mode=TwoWay}"  ToolTip="Item ammo count. Set current to -1 to remove, or 1 to give an item without ammo.">
-                <ComboBoxItem Content="Ration"/>
-                <ComboBoxItem Content="Scope (no action)"/>
-                <ComboBoxItem Content="Medicine"/>
-                <ComboBoxItem Content="Bandage"/>
-                <ComboBoxItem Content="Pentazemin"/>
-                <ComboBoxItem Content="B.D.U."/>
-                <ComboBoxItem Content="B.Armor"/>
-                <ComboBoxItem Content="Stealth"/>
-                <ComboBoxItem Content="Mine Detector"/>
-                <ComboBoxItem Content="Sensor A"/>
-                <ComboBoxItem Content="Sensor B"/>
-                <ComboBoxItem Content="Night Vision Goggles"/>
-                <ComboBoxItem Content="Thermal Goggles"/>
-                <ComboBoxItem Content="Scope"/>
-                <ComboBoxItem Content="Digital Camera"/>
-                <ComboBoxItem Content="Box 1"/>
-                <ComboBoxItem Content="Cigs"/>
-                <ComboBoxItem Content="Card"/>
-                <ComboBoxItem Content="Shaver"/>
-                <ComboBoxItem Content="Phone"/>
-                <ComboBoxItem Content="Camera"/>
-                <ComboBoxItem Content="Box 2"/>
-                <ComboBoxItem Content="Box 3"/>
-                <ComboBoxItem Content="Wet Box"/>
-                <ComboBoxItem Content="AP Sensor"/>
-                <ComboBoxItem Content="Box 4"/>
-                <ComboBoxItem Content="Box 5"/>
-                <ComboBoxItem Content="??"/>
-                <ComboBoxItem Content="SOCOM Suppressor"/>
-                <ComboBoxItem Content="AK Suppressor"/>
-                <ComboBoxItem Content="Camera (no action)"/>
-                <ComboBoxItem Content="Bandana"/>
-                <ComboBoxItem Content="Dog Tags"/>
-                <ComboBoxItem Content="MO Disc"/>
-                <ComboBoxItem Content="USP Suppressor"/>
-                <ComboBoxItem Content="Infinity Wig (Brown)"/>
-                <ComboBoxItem Content="Wig A (Blue)"/>
-                <ComboBoxItem Content="Wig B (Orange)"/>
-                <ComboBoxItem Content="Wig C (Color)"/>
-                <ComboBoxItem Content="Wig D (Color)"/>
-            </ComboBox>
-            <TextBox x:Name="txtItemCurrent" Grid.Row="3" Grid.Column="1" Text="{Binding ItemAmmoCurrent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-            <TextBox x:Name="txtItemMax" Grid.Row="3" Grid.Column="2" Text="{Binding ItemAmmoMax, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-            <ComboBox x:Name="cmbProgress" Grid.Row="4" Grid.ColumnSpan="2" ItemsSource="{Binding ProgressNames.Values, Mode=OneWay}" SelectedIndex="{Binding ProgressCurrentInList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ToolTip="Game progress flag. This does not change your location."/>
-            <TextBox x:Name="txtProgress" Grid.Row="4" Grid.Column="2" Text="{Binding ProgressCurrent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            <Grid Grid.Row="1" Grid.ColumnSpan="3" Margin="0,0,0,10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="22"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="32"/>
+                </Grid.ColumnDefinitions>
+                <ComboBox x:Name="cmbContinueRoom" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" ItemsSource="{Binding WarpData.WarpGroupsList, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding SelectedWarpGroup, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectionChanged="cmbContinueStateRoom_Changed" ToolTip="Destination Area to warp to. Right-click to change Profile.">
+                    <ComboBox.ContextMenu>
+                        <ContextMenu ItemsSource="{Binding WarpProfiles, Mode=OneWay}" TargetUpdated="ContextMenu_TargetUpdated">
+                            <ContextMenu.ItemContainerStyle>
+                                <Style TargetType="{x:Type MenuItem}">
+                                    <!--<Setter Property="IsChecked" Value="{Binding IsSelected}"/>-->
+                                    <Setter Property="Header" Value="{Binding}"/>
+                                    <Setter Property="Command" Value="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}, Path=LoadWarpsProfileCommand}"/>
+                                    <Setter Property="CommandParameter" Value="{Binding}"/>
+                                </Style>
+                            </ContextMenu.ItemContainerStyle>
+                        </ContextMenu>
+                    </ComboBox.ContextMenu>
+                </ComboBox>
+                <ComboBox x:Name="cmbContinueRoomVariant" Grid.Row="1" Grid.Column="1" ItemsSource="{Binding SelectedWarpGroup.WarpsList, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding SelectedWarp, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True" ToolTip="Origin Area to enter the destination from."/>
+
+                <!--<Button Grid.Row="0" Grid.Column="0" x:Name="btnContinueProfile" ToolTip="Profile" Click="btnContinueProfile_Click" Content="📖"/>-->
+                <Button Grid.Row="1" Grid.Column="0" x:Name="btnContinueRoomSettings" ToolTip="Advanced settings" Click="btnContinueRoomSettings_Click" Content="⚙️"/>
+                <Button Grid.Column="3" Grid.RowSpan="2" x:Name="btnContinueRoomActivate" ToolTip="Click to go here." Click="btnContinueRoom_Click" Content="✔"/>
+            </Grid>
+            <CheckBox x:Name="chkSetContinueAmmo" Grid.Row="2" Grid.Column="0" IsChecked="{Binding SetContinueAmmo, Mode=OneWayToSource}" Content="Also edit Continue state" ToolTip="If enabled, will also set your ammo count when continuing in the current area or using Restart Area." VerticalAlignment="Center" FontSize="10"/>
+            <TextBlock Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Bottom">Cur</TextBlock>
+            <TextBlock Grid.Row="2" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Bottom">Max</TextBlock>
+            <ComboBox x:Name="cmbWeaponName" Grid.Row="3" Grid.Column="0" ItemsSource="{Binding WeaponNames, Mode=OneTime}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding WeaponSelected, Mode=TwoWay}" ToolTip="Weapon ammo count. Set current to -1 to remove, or 1 to give a weapon without ammo."/>
+            <xctk:IntegerUpDown x:Name="txtWeaponCurrent" Grid.Row="3" Grid.Column="1" Text="{Binding WeaponAmmoCurrent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Maximum="65535" Minimum="-1" MouseWheelActiveTrigger="MouseOver" UpdateValueOnEnterKey="False"/>
+            <xctk:IntegerUpDown x:Name="txtWeaponMax" Grid.Row="3" Grid.Column="2" Text="{Binding WeaponAmmoMax, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Maximum="65535" Minimum="-1" MouseWheelActiveTrigger="MouseOver" UpdateValueOnEnterKey="False"/>
+
+            <ComboBox x:Name="cmbItemName" Grid.Row="4" Grid.Column="0" ItemsSource="{Binding ItemNames, Mode=OneTime}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding ItemSelected, Mode=TwoWay}" ToolTip="Item ammo count. Set current to -1 to remove, or 1 to give an item without ammo."/>
+            <xctk:IntegerUpDown x:Name="txtItemCurrent" Grid.Row="4" Grid.Column="1" Text="{Binding ItemAmmoCurrent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Maximum="65535" Minimum="-1" MouseWheelActiveTrigger="MouseOver" UpdateValueOnEnterKey="False"/>
+            <xctk:IntegerUpDown x:Name="txtItemMax" Grid.Row="4" Grid.Column="2" Text="{Binding ItemAmmoMax, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Maximum="65535" Minimum="-1" MouseWheelActiveTrigger="MouseOver" UpdateValueOnEnterKey="False"/>
             
-            <ComboBox x:Name="cmbInitialState" Grid.Row="5" Grid.ColumnSpan="1" ItemsSource="{Binding InitialStateAreas, Mode=OneWay}" SelectedIndex="{Binding InitialState, Mode=TwoWay}" ToolTip="Modify the behaviour of an area, e.g. to restore first-time-only guards."/>
-            <TextBlock Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" Text=" at initial state" VerticalAlignment="Center"/>
+            <ComboBox x:Name="cmbProgress" Grid.Row="5" Grid.ColumnSpan="2" ItemsSource="{Binding ProgressNames.Values, Mode=OneWay}" SelectedIndex="{Binding ProgressCurrentInList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ToolTip="Game progress flag. This does not change your location."/>
+            <xctk:IntegerUpDown x:Name="txtProgress" Grid.Row="5" Grid.Column="2" Text="{Binding ProgressCurrent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MouseWheelActiveTrigger="MouseOver" UpdateValueOnEnterKey="False"/>
 
-            <ComboBox x:Name="cmbDifficulty" Grid.Row="6" ItemsSource="{Binding Difficulties, Mode=OneWay}" SelectedIndex="{Binding DifficultyCurrent, Mode=TwoWay}" ToolTip="Change the current difficulty. This will not change other aspects of the game such as health and ammo."/>
-            <TextBlock Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Text=" difficulty" VerticalAlignment="Center"/>
-
-            <TextBlock Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Text="Dog Tags always available" VerticalAlignment="Center" HorizontalAlignment="Right" ToolTip="Restore the uncollected state of all dog tags when reentering an area."/>
-            <CheckBox x:Name="chkLockDogTags" Grid.Row="7" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" IsChecked="{Binding LockDogTags, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-            <TextBlock Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Text="Boss Practice mode" VerticalAlignment="Center" HorizontalAlignment="Right" ToolTip="Restart Area automatically when a boss is defeated."/>
-            <CheckBox x:Name="chkBossPractice" Grid.Row="8" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" IsChecked="{Binding BossPractice, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MouseRightButtonUp="chkBossPractice_RightClick"/>
+            <xctk:CheckComboBox x:Name="cmbInitialState" Grid.Row="6" Grid.ColumnSpan="3" ItemsSource="{Binding AreaModifications, Mode=OneWay}"  SelectedItemsOverride="{Binding SelectedAreaMods, Mode=TwoWay}" ToolTip="{Binding RelativeSource={RelativeSource Mode=Self}, Path=SelectedValue, Mode=OneWay}" ItemSelectionChanged="cmbInitialState_ItemSelectionChanged" Delimiter=", " Height="22.4"/>
 
         </Grid>
         <Grid Grid.Row="1" Margin="4,10,4,12">
@@ -182,14 +132,14 @@
             <Button x:Name="btnCautionOn" Content="60 secs" Grid.Row="1" Grid.Column="2" Click="btnCautionOn_Click" MouseRightButtonUp="btnCautionOn_RightClick" ToolTip="Right click to change duration."/>
             <Button x:Name="btnCautionOff" Content="Off" Grid.Row="1" Grid.Column="3" Click="btnCautionOff_Click"/>
             <!-- MouseRightButtonUp="btnUnlockOff_RightClick"/>-->
-            
-            <Button x:Name="btnRestartRoom" Content="Restart Area" Grid.Row="2" Grid.ColumnSpan="2" Click="btnRestartRoom_Click"/>
+
+            <Button x:Name="btnRestartRoom" Content="Restart Area" Grid.Row="2" Grid.ColumnSpan="2" Click="btnRestartRoom_Click" MouseRightButtonUp="btnRestartRoom_RightClick" ToolTip="Right click to reset the game."/>
             <Button x:Name="btnSuicide" Content="Suicide" Grid.Row="2" Grid.Column="2" Click="btnSuicide_Click"/>
             <Button x:Name="btnHealthFill" Content="Fill Life" Grid.Row="2" Grid.Column="3" Click="btnHealthFill_Click" MouseRightButtonUp="btnHealthFill_RightClick"/>
 
             <Button x:Name="btnUnlockEquips" Content="Unlock All Equips" Grid.Row="3" Grid.ColumnSpan="4" Click="btnUnlockEquips_Click" MouseRightButtonUp="btnUnlockEquips_RightClick" ToolTip="Right click to unlock all equips regardless of character."/>
         </Grid>
-        <Grid Grid.Row="8" Margin="4">
+        <Grid Grid.Row="2" Margin="4">
             <Grid.RowDefinitions>
                 <RowDefinition Height="1*"/>
                 <RowDefinition Height="1*"/>
@@ -223,6 +173,23 @@
             <Button x:Name="btnUpdatePos" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Content="Update" Click="btnUpdatePos_Click" ToolTip="Set X/Y/Z positions to those in the boxes above."/>
             <Button x:Name="btnPosZToggle" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" Content="[Un]Lock Z" Click="btnPosZToggle_Click" ToolTip="Lock/unlock the Z position (e.g. for air walking). This also affects enemies."/>
             <Button x:Name="btnPosZRecover" Grid.Row="3" Grid.Column="4" Grid.ColumnSpan="2" Content="Recover Z" Click="btnPosZRecover_Click" ToolTip="Use if you've fallen into the void."/>
+        </Grid>
+        <Grid Grid.Row="3" Margin="0,10,0,0">
+            <!--Visibility="Hidden" Height="0">  remove this when ready -->
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <!--<ColumnDefinition/>
+                <ColumnDefinition/>-->
+            </Grid.ColumnDefinitions>
+            <Button x:Name="btnRadarToggle" Grid.Column="0" Content="Radar" ToolTip="Radar Type" Click="btnRadarToggle_Click"/>
+            <Button x:Name="btnEquipModeToggle" Grid.Column="1" Content="Equip" ToolTip="Equip Mode" Click="btnEquipModeToggle_Click"/>
+            <Button x:Name="btnDifficultyToggle" Grid.Column="2" Background="{Binding DifficultyCurrent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource DifficultyColorConverter}}" Content="{Binding DifficultyCurrent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource DiffNameConverter}}" ToolTip="{Binding DifficultyCurrent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource DifficultyNameConverter}}" Click="btnDifficultyToggle_Click"/>
+            <!--<Button x:Name="btnPracticeModeToggle" Grid.Column="3" Content="Prac" ToolTip="Practice Mode" Click="btnPracticeModeToggle_Click"/>
+            <Button x:Name="btnRoomModToggle" Grid.Column="4" Content="Mod" ToolTip="Room Modifications" Click="btnRoomModToggle_Click"/>-->
+            <Button x:Name="btnHotkeyToggle" Grid.Column="3" Content="Hotkeys" ToolTip="Enable Hotkeys" Click="btnHotkeyToggle_Click"/>
         </Grid>
     </Grid>
 </Window>

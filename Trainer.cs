@@ -1,11 +1,14 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Dynamic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -13,22 +16,28 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
+using System.Windows.Media;
 using Timer = System.Timers.Timer;
 
 namespace MGS2Trainer
 {
-    class Trainer : INotifyPropertyChanged
+    public class Trainer : INotifyPropertyChanged
     {
         public Memory Mem { get; private set; }
-        public static UInt32 WeaponAddr { get; } = 0x653E08;
-        public static UInt32 WeaponCurrentAddrOffset { get; } = 0x2;
-        public static UInt32 WeaponMaxAddrOffset { get; } = 0x4A;
+        //public static UInt32 WeaponAddr { get; } = 0x653E08;
+        //public static UInt32 WeaponCurrentAddrOffset { get; } = 0x2;
+        //public static UInt32 WeaponMaxAddrOffset { get; } = 0x4A;
+        public static UInt32 WeaponCurrentAddrOffset { get; } = 0x15E;
+        public static UInt32 WeaponMaxAddrOffset { get; } = 0x1A6;
+        public bool SetContinueAmmo { get; set; }
         public uint WeaponSelected { get; set; }
         public short WeaponAmmoCurrent { get; set; }
         public short WeaponAmmoMax { get; set; }
         public static UInt32 ItemAddr { get; } = 0x653E10;// = 0xD8AFAE;
-        public static UInt32 ItemCurrentAddrOffset { get; } = 0x2;
-        public static UInt32 ItemMaxAddrOffset { get; } = 0x62;
+        //public static UInt32 ItemCurrentAddrOffset { get; } = 0x2;
+        //public static UInt32 ItemMaxAddrOffset { get; } = 0x62;
+        public static UInt32 ItemCurrentAddrOffset { get; } = 0x1EE;
+        public static UInt32 ItemMaxAddrOffset { get; } = 0x24E;
         public uint ItemSelected { get; set; }
         public short ItemAmmoCurrent { get; set; }
         public short ItemAmmoMax { get; set; }
@@ -59,6 +68,12 @@ namespace MGS2Trainer
         public static UInt32 ContinueBytesAddr { get; } = 0xD8FE00;
         public static UInt32 RoomCodeAddr { get; } = 0xD8ADEC;
         public static UInt32 WeaponSelectedAddr { get; } = 0xD8AEC4;
+        public bool RoomModsEnabled { get; set; }
+        public int RadarType { get; set; }
+        public WarpConfig WarpData { get; set; }
+        public Warp SelectedWarpGroup { get; set; }
+        public Warp SelectedWarp { get; set; }
+        public List<Warp> WarpEntries { get; set; }
 
         public static Dictionary<byte, List<byte>> WeaponGroups = new Dictionary<byte, List<byte>>() {
             {  0, new List<byte> { 0 } },
@@ -76,6 +91,29 @@ namespace MGS2Trainer
         public static ushort[] CautionDurations = new ushort[] { 45, 60, 120, ushort.MaxValue };
         public int CautionDurationIndex { get; set; } = 1;
 
+        public static Dictionary<uint, string> WeaponNames { get; set; } = new Dictionary<uint, string>()
+        {
+            { 0, "M9" },
+            { 1, "USP" },
+            { 2, "SOCOM" },
+            { 14, "AKS-74u" },
+            { 17, "M4" },
+            { 3, "PSG-1" },
+            { 18, "PSG-1T" },
+            { 16, "Grenade" },
+            { 9, "Chaff Grenade" },
+            { 10, "Stun Grenade" },
+            { 15, "Magazine" },
+            { 4, "RGB6" },
+            { 5, "Nikita" },
+            { 6, "Stinger" },
+            { 12, "HF Blade" },
+            { 11, "D.Mic" },
+            { 20, "Book" },
+            { 7, "Claymore" },
+            { 8, "C4" },
+            { 19, "D.Mic (cutscene)" }
+        };
         public static byte[] ValidWeaponsTanker = new byte[] { 0, 1, 9, 10, 15, 16 };
         public static byte[] ValidWeaponsPlant = new byte[] { 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20 };
         // +1 for the equipped weapon id
@@ -83,6 +121,48 @@ namespace MGS2Trainer
         // (10)Stun, (11)D.Mic, (12)HF Blade, (13)Coolant, (14)AK-74u, (15)Magazine, (16)Grenade, (17)M4, (18)PSG-1T, (19)D.Mic(CS)
         // (20)Book
 
+        public static Dictionary<uint, string> ItemNames { get; set; } = new Dictionary<uint, string>()
+        {
+            { 0, "Ration" },
+            { 13, "Scope" },
+            { 14, "Digital Camera" },
+            { 20, "Camera" },
+            { 11, "Night Vision Goggles" },
+            { 12, "Thermal Goggles" },
+            { 9, "Sensor A" },
+            { 10, "Sensor B" },
+            { 8, "Mine Detector" },
+            { 24, "AP Sensor" },
+            { 15, "Box 1" },
+            { 23, "Wet Box" },
+            { 21, "Box 2" },
+            { 22, "Box 3" },
+            { 25, "Box 4" },
+            { 26, "Box 5" },
+            { 6, "Body Armor" },
+            { 5, "B.D.U." },
+            { 36, "Wig A (Blue)" },
+            { 37, "Wig B (Orange)" },
+            { 31, "Bandana" },
+            { 35, "Infinity Wig (Brown)" },
+            { 7, "Stealth" },
+            { 32, "Dog Tags" },
+            { 18, "Shaver" },
+            { 19, "Phone" },
+            { 28, "SOCOM Suppressor" },
+            { 29, "AK Suppressor" },
+            { 34, "USP Suppressor" },
+            { 17, "Card" },
+            { 33, "MO Disc" },
+            { 16, "Cigs" },
+            { 3, "Bandage" },
+            { 4, "Pentazemin" },
+            { 2, "Medicine" },
+            { 1, "Scope (cutscene)" },
+            { 30, "Camera (cutscene)" },
+            { 38, "Wig C" },
+            { 39, "Wig D" }
+        };
         public static byte[] ValidItemsTanker = new byte[] { 0, 2, 3, 6, 7, 12, 14, 15, 16, 20, 23, 31, 34 };
         public static byte[] ValidItemsPlant = new byte[] { 0, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 28, 29, 33, 35, 36, 37 };
         // (0)Ration, (1)Scope(CS), (2)Medicine, (3)Bandage, (4)Pentazemin, (5)BDU, (6)B.Armor, (7)Stealth, (8)Mine.D, (9)Sensor A
@@ -91,6 +171,8 @@ namespace MGS2Trainer
         // (30)Camera(CS), (31)Bandana, (32)Dog Tags, (33)MO Disc, (34)USP Supp, (35)Inf.Wig, (36)Blue Wig, (37)Orange Wig, (38)Wig C, (39)Wig D
 
         public static List<string> Difficulties { get; } = new List<string> { "Very Easy", "Easy", "Normal", "Hard", "Extreme", "European Extreme" };
+        public static List<string> Diffs { get; } = new List<string> { "VE", "Ez", "Nm", "Hd", "Ex", "EE" };
+        public static List<Brush> DiffBrushes { get; } = new List<Brush> { Brushes.LightBlue, Brushes.LightCyan, Brushes.LightGreen, Brushes.LightYellow, Brushes.Orange, Brushes.IndianRed };
         public byte DifficultyCurrent { get; set; }
 
 
@@ -108,6 +190,31 @@ namespace MGS2Trainer
         public void AttachToGame()
         {
             Mem = new Memory("mgs2_sse");
+        }
+
+        public uint PadInput
+        {
+            get
+            {
+                uint main = Mem.ReadAddress<uint>(0xADADDC, null);
+
+                uint neg = Mem.ReadAddress<uint>(0xAD55AC, null);
+                uint pos = (0xF000 - (neg & 0xF000)) << 12;
+                neg = (neg & 0xF000) << 16;
+
+                ushort right = Mem.ReadAddress<ushort>(0xADADEC, null);
+                byte rightx = (byte)(right & 0xFF);
+                byte righty = (byte)((right & 0xFF00) >> 8);
+                uint rstick = 0;
+                if (righty < 0x50) rstick += 1;
+                if (rightx > 0xA0) rstick += 2;
+                if (righty > 0xA0) rstick += 4;
+                if (rightx < 0x50) rstick += 8;
+                rstick = rstick << 20;
+
+                // 0x12344444 where 1=negative dpad, 2=positive dpad, 3=positive right stick, 4=everything else
+                return (main + pos + neg + rstick);
+            }
         }
 
         public void SetAlert(bool on)
@@ -178,49 +285,147 @@ namespace MGS2Trainer
 
         }
 
-        // short: 1 = Vibration OFF, 4 = No Radar or Radar 2, 8 = Blood OFF
+        // short: 1 = Vibration OFF, 4 = No Radar, 8 = Blood OFF
         // 0x20 = Radar 2, 0x40 = Reverse view, 0x80 = Linear menu, 0x200 = Previous equip
         UInt32 OptionsAddr = 0x601F34;
         UInt32 OptionsContinueAddr = 0x601F38;
         UInt32[] OptionsOffset = new UInt32[] { 6 };
-        public void SetRadar(bool on, bool toggle = false)
+        public void SetRadar(int type)
+        {
+            if (type == -1)
+            {
+                type = ((RadarType + 1) % 3);
+            }
+
+            if ((type >= 0) && (type <= 2))
+            {
+                short opts = Mem.ReadAddress<short>(OptionsAddr, OptionsOffset);
+                opts &= (short.MaxValue - 0x24);
+
+                if (type == 0)
+                {
+                    opts |= 4;
+                }
+                else if (type == 2)
+                {
+                    opts |= 0x20;
+                }
+                Mem.WriteAddress<short>(OptionsAddr, OptionsOffset, opts);
+                Mem.WriteAddress<short>(OptionsContinueAddr, OptionsOffset, opts);
+                RefreshRadar();
+            }
+        }
+        public void SetRadarOn() => SetRadar(1);
+        public void SetRadarOff() => SetRadar(0);
+        public void ToggleRadar() => SetRadar(-1);
+        public void RefreshRadar()
+        {
+            short opts = Mem.ReadAddress<short>(OptionsAddr, OptionsOffset);
+
+            int type = 1;
+            if ((opts & 0x20) == 0x20)
+            {
+                type = 2;
+            }
+            else if ((opts & 4) == 4)
+            {
+                type = 0;
+            }
+
+            if (RadarType != type)
+            {
+                RadarType = type;
+                OnPropertyChanged("RadarType");
+            }
+
+        }
+
+        public void SetGOID(bool on)
+        {
+            var offset = new UInt32[] { 7 };
+            byte opts = Mem.ReadAddress<byte>(OptionsAddr, offset);
+
+            if (on)
+            {
+                opts |= 8;
+            }
+            else
+            {
+                opts &= byte.MaxValue - 8;
+            }
+
+            Mem.WriteAddress<byte>(OptionsAddr, offset, opts);
+            Mem.WriteAddress<byte>(OptionsContinueAddr, offset, opts);
+        }
+        public void SetGOIDOn() => SetGOID(true);
+        public void SetGOIDOff() => SetGOID(false);
+
+        public void SetEquipMode(bool previous, bool toggle = false)
         {
             short opts = Mem.ReadAddress<short>(OptionsAddr, OptionsOffset);
 
             if (toggle)
             {
-                if ( ((opts & 4) == 0) || ((opts & 0x24) == 0x24) )
-                {
-                    opts &= (short.MaxValue - 0x20);
-                    opts |= 4;
-                }
-                else
-                {
-                    opts &= (short.MaxValue - 0x24);
-                }
+                opts ^= 0x200;
             }
             else
             {
-                // force radar 1, not 2
-                opts &= (short.MaxValue - 0x20);
-                // set radar
-                opts = (short)(on ? (opts & (short.MaxValue - 4)) : (opts | 4));
+                opts = (short)(previous ? (opts | 0x200) : (opts & (short.MaxValue - 0x200)));
             }
 
             Mem.WriteAddress<short>(OptionsAddr, OptionsOffset, opts);
             Mem.WriteAddress<short>(OptionsContinueAddr, OptionsOffset, opts);
+            RefreshEquipMode();
         }
-        public void SetRadarOn() => SetRadar(true);
-        public void SetRadarOff() => SetRadar(false);
-        public void ToggleRadar() => SetRadar(true, true);
+        public void SetEquipPrevious() => SetEquipMode(true);
+        public void SetEquipUnequip() => SetEquipMode(false);
+        public void ToggleEquipMode() => SetEquipMode(true, true);
+        public void RefreshEquipMode()
+        {
+            short opts = Mem.ReadAddress<short>(OptionsAddr, OptionsOffset);
+            // ....
+        }
 
-        public void DoRestartRoom()
+        public void TogglePracticeMode() => BossPractice ^= true;
+        public void ToggleRoomMods() => RoomModsEnabled ^= true;
+
+
+
+        public void DoRestartRoom(bool reset = false)
         {
-            Mem.GameProcess[(IntPtr)0x477de0, true].Execute();
+            // Don't attempt to restart inside a codec
+            if (Mem.ReadAddress<byte>(0xD8ADB0, null) == 1)
+            {
+                /*
+                if (RestartAttempts < 3)
+                {
+                    RestartAttempts++;
+                    uint input = Mem.ReadAddress<uint>(0xADADDC, null);
+                    Mem.WriteAddress<uint>(0xADADDC, null, input | 0x100);
+                    Thread.Sleep(1000);
+                    DoRestartRoom(reset);
+                }
+                else
+                {
+                    RestartAttempts = 0;
+                }
+                */
+            }
+            else {
+                UInt32 continuesAddr = 0x3E315E;
+                UInt32[] continuesOffset = new UInt32[] { 0x65 };
+                short continues = Mem.ReadAddress<short>(continuesAddr, continuesOffset);
+                if (continues >= 0)
+                {
+                    Mem.WriteAddress<short>(continuesAddr, continuesOffset, (short)(continues - 1));
+                }
+                //Mem.WriteAddress<byte>(0x601F38, new UInt32[] { 0xBC }, (byte)(Mem.ReadAddress<byte>(0x601F38, new UInt32[] { 0xBC }) + 1));
+                Mem.GameProcess[(IntPtr)0x477de0, true].Execute(reset ? 1 : 0);
+            }
         }
-        public void DoRestartRoom(float delay)
+        public void DoRestartRoom(bool reset, float delay)
         {
-            DoRestartRoom();
+            DoRestartRoom(reset);
 
             if (delay > 0)
             {
@@ -229,6 +434,7 @@ namespace MGS2Trainer
                 Mem.ResumeProcess();
             }
         }
+        public void DoResetGame() => DoRestartRoom(true);
 
         public void RefreshName()
         {
@@ -246,8 +452,8 @@ namespace MGS2Trainer
 
         public void RefreshWeaponValues()
         {
-            WeaponAmmoCurrent = Mem.ReadAddress<short>(WeaponAddr, new UInt32[] { WeaponCurrentAddrOffset + (WeaponSelected * 2) });
-            WeaponAmmoMax = Mem.ReadAddress<short>(WeaponAddr, new UInt32[] { WeaponMaxAddrOffset + (WeaponSelected * 2) });
+            WeaponAmmoCurrent = Mem.ReadAddress<short>(OptionsAddr, new UInt32[] { WeaponCurrentAddrOffset + (WeaponSelected * 2) });
+            WeaponAmmoMax = Mem.ReadAddress<short>(OptionsAddr, new UInt32[] { WeaponMaxAddrOffset + (WeaponSelected * 2) });
             OnPropertyChanged("WeaponAmmoCurrent");
             OnPropertyChanged("WeaponAmmoMax");
         }
@@ -256,20 +462,28 @@ namespace MGS2Trainer
         {
             if (item == null) item = WeaponSelected;
             if (ammo == null) ammo = WeaponAmmoCurrent;
-            Mem.WriteAddress<short>(WeaponAddr, new UInt32[] { WeaponCurrentAddrOffset + ((uint)item * 2) }, (short)ammo);
+            Mem.WriteAddress<short>(OptionsAddr, new UInt32[] { WeaponCurrentAddrOffset + ((uint)item * 2) }, (short)ammo);
+            if (SetContinueAmmo)
+            {
+                Mem.WriteAddress<short>(OptionsContinueAddr, new UInt32[] { WeaponCurrentAddrOffset + ((uint)item * 2) }, (short)ammo);
+            }
         }
 
         public void SetWeaponMax(uint? item = null, short? ammo = null)
         {
             if (item == null) item = WeaponSelected;
-            if (ammo == null) ammo = WeaponAmmoCurrent;
-            Mem.WriteAddress<short>(WeaponAddr, new UInt32[] { WeaponMaxAddrOffset + ((uint)item * 2) }, (short)ammo);
+            if (ammo == null) ammo = WeaponAmmoMax;
+            Mem.WriteAddress<short>(OptionsAddr, new UInt32[] { WeaponMaxAddrOffset + ((uint)item * 2) }, (short)ammo);
+            if (SetContinueAmmo)
+            {
+                Mem.WriteAddress<short>(OptionsContinueAddr, new UInt32[] { WeaponMaxAddrOffset + ((uint)item * 2) }, (short)ammo);
+            }
         }
 
         public void RefreshItemValues()
         {
-            ItemAmmoCurrent = Mem.ReadAddress<short>(ItemAddr, new UInt32[] { ItemCurrentAddrOffset + (ItemSelected * 2) });
-            ItemAmmoMax = Mem.ReadAddress<short>(ItemAddr, new UInt32[] { ItemMaxAddrOffset + (ItemSelected * 2) });
+            ItemAmmoCurrent = Mem.ReadAddress<short>(OptionsAddr, new UInt32[] { ItemCurrentAddrOffset + (ItemSelected * 2) });
+            ItemAmmoMax = Mem.ReadAddress<short>(OptionsAddr, new UInt32[] { ItemMaxAddrOffset + (ItemSelected * 2) });
             OnPropertyChanged("ItemAmmoCurrent");
             OnPropertyChanged("ItemAmmoMax");
         }
@@ -299,14 +513,22 @@ namespace MGS2Trainer
         {
             if (item == null) item = ItemSelected;
             if (ammo == null) ammo = ItemAmmoCurrent;
-            Mem.WriteAddress<short>(ItemAddr, new UInt32[] { ItemCurrentAddrOffset + ((uint)item * 2) }, (short)ammo);
+            Mem.WriteAddress<short>(OptionsAddr, new UInt32[] { ItemCurrentAddrOffset + ((uint)item * 2) }, (short)ammo);
+            if (SetContinueAmmo)
+            {
+                Mem.WriteAddress<short>(OptionsContinueAddr, new UInt32[] { ItemCurrentAddrOffset + ((uint)item * 2) }, (short)ammo);
+            }
         }
 
         public void SetItemMax(uint? item = null, short? ammo = null)
         {
             if (item == null) item = ItemSelected;
             if (ammo == null) ammo = ItemAmmoMax;
-            Mem.WriteAddress<short>(ItemAddr, new UInt32[] { ItemMaxAddrOffset + ((uint)item * 2) }, (short)ammo);
+            Mem.WriteAddress<short>(OptionsAddr, new UInt32[] { ItemMaxAddrOffset + ((uint)item * 2) }, (short)ammo);
+            if (SetContinueAmmo)
+            {
+                Mem.WriteAddress<short>(OptionsContinueAddr, new UInt32[] { ItemMaxAddrOffset + ((uint)item * 2) }, (short)ammo);
+            }
         }
 
         public void UnlockAllWeapons(bool everything = false)
@@ -376,7 +598,7 @@ namespace MGS2Trainer
             while (++index < g.Count)
             {
                 byte next = g[index];
-                if (Mem.ReadAddress<short>(WeaponAddr, new UInt32[] { WeaponCurrentAddrOffset + (((uint)next - 1) * 2) }) >= 0)
+                if (Mem.ReadAddress<short>(OptionsAddr, new UInt32[] { WeaponCurrentAddrOffset + (((uint)next - 1) * 2) }) >= 0)
                 {
                     Mem.WriteAddress<byte>(WeaponSelectedAddr, null, next);
                     return;
@@ -390,7 +612,7 @@ namespace MGS2Trainer
             {
                 if (weapon == 2) weapon = 3;
             }
-            if (Mem.ReadAddress<short>(WeaponAddr, new UInt32[] { WeaponCurrentAddrOffset + (((uint)weapon - 1) * 2) }) >= 0)
+            if (Mem.ReadAddress<short>(OptionsAddr, new UInt32[] { WeaponCurrentAddrOffset + (((uint)weapon - 1) * 2) }) >= 0)
             {
                 Mem.WriteAddress<byte>(WeaponSelectedAddr, null, weapon);
             }
@@ -592,6 +814,12 @@ namespace MGS2Trainer
             diff = (byte)((diff + 1) * 10);
             Mem.WriteAddress<byte>(DifficultyAddr, null, diff);
             Mem.WriteAddress<byte>(DifficultyContinueAddr, null, diff);
+            RefreshDifficulty();
+        }
+        public void ToggleDifficulty()
+        {
+            byte cur = (byte)(Mem.ReadAddress<byte>(DifficultyAddr, null) / 10); // this is 1-based, so it's already just about right!
+            SetDifficulty((byte)(cur % 6));
         }
 
         public static byte[] NOP = new byte[] { 0x90, 0x90, 0x90 };
@@ -643,11 +871,32 @@ namespace MGS2Trainer
             "Shell 1 Core, B1 Hall (middle-aged women)",
             "Shell 1 Core, B1 Hall (Jennifers)"*/
         };
+        public List<string> AreaModifications { get; } = new List<string>()
+        {
+            "Boss Practice Mode",
+            "Dog Tags always available",
+            "[1st Time] Engine Room",
+            "[1st Time] Shell 1 Core, B1",
+            "[1st Time] Arsenal Gear - Jejunum",
+            "[Hostages] Normal variant",
+            "[Hostages] Beasts variant",
+            "[Hostages] Beauties variant",
+            "[Hostages] Old Beauties variant"
+        };
+        public ObservableCollection<string> SelectedAreaMods { get; set; } = new ObservableCollection<string>();
         public void WatchInitialStates()
         {
-            if (InitialState == 1) // Engine Room
+            if (SelectedAreaMods == null)
             {
-                if (Mem.ReadStringAddress(RoomCodeAddr, null, 4) == "w02a")
+                return;
+            }
+
+            string room = Mem.ReadStringAddress(RoomCodeAddr, null, 4);
+
+            //if (InitialState == 1) // Engine Room
+            if (SelectedAreaMods.Contains("[1st Time] Engine Room"))
+            {
+                if (room == "w02a")
                 {
                     if ((ContinueBytes == null) || (ContinueBytes.Length == 0)) {
                         ContinueBytes = Mem.ReadBytes(ContinueBytesAddr, null, 0x100);
@@ -678,7 +927,9 @@ namespace MGS2Trainer
                     Mem.WriteAddress<byte>(EngineRoomPatternAddr, null, guards);
                 }
             }
-            else if (InitialState == 2) // Shell 1 Core B1 (before Ames)
+
+            //else if (InitialState == 2) // Shell 1 Core B1 (before Ames)
+            if (SelectedAreaMods.Contains("[1st Time] Shell 1 Core, B1"))
             {
                 if (ProgressCurrent == 152)
                 {
@@ -686,25 +937,37 @@ namespace MGS2Trainer
                     Mem.WriteAddress<short>(ProgressPlantContinueAddr, null, 150);
                 }
             }
-            else if (InitialState == 3) // Jejunum
+
+            //else if (InitialState == 3) // Jejunum
+            if (SelectedAreaMods.Contains("[1st Time] Arsenal Gear - Jejunum"))
             {
-                if ( (ProgressCurrent > 374) && (Mem.ReadAddress<int>(RoomTimeAddr, null) < 180) )
+                if ((ProgressCurrent > 374) && (Mem.ReadAddress<int>(RoomTimeAddr, null) < 180))
                 {
                     SetProgress(374);
-                } 
-            }
-            /*
-            else if (InitialState == 3)
-            {
-                if (ProgressCurrent == 490)
-                {
-                    if (Mem.ReadAddress<int>(0x3E315E, new UInt32[] { 0x17 }) > 1800)
-                    {
-                        Mem.SuspendProcess();
-                    }
                 }
             }
-            */
+
+            byte hour = 255;
+            if (SelectedAreaMods.Contains("[Hostages] Normal variant"))
+            {
+                hour = 1;
+            }
+            else if (SelectedAreaMods.Contains("[Hostages] Beasts variant"))
+            {
+                hour = 13;
+            }
+            else if (SelectedAreaMods.Contains("[Hostages] Beauties variant"))
+            {
+                hour = 0;
+            }
+            else if (SelectedAreaMods.Contains("[Hostages] Old Beauties variant"))
+            {
+                hour = 22;
+            }
+            if (hour != 255)
+            {
+                SetHostageHour(hour);
+            }
         }
 
         public Dictionary<string, UInt32[]> BossHealthAddrs = new Dictionary<string, UInt32[]>
@@ -734,7 +997,13 @@ namespace MGS2Trainer
 
         public void WatchBossPractice()
         {
-            if (BossPractice)
+            if (SelectedAreaMods == null)
+            {
+                return;
+            }
+
+            //if (BossPractice)
+            if (SelectedAreaMods.Contains("Boss Practice Mode"))
             {
                 string[] suffixes = new string[] { "", "-2" };
                 string room = Mem.ReadStringAddress(RoomCodeAddr, null, 4) + "_" + ProgressCurrent;
@@ -749,7 +1018,7 @@ namespace MGS2Trainer
                     {
                         if (Mem.ReadAddress<byte>(0x664E7C, new UInt32[] { 0x280 }) == 0)
                         {
-                            DoRestartRoom(BossPracticeDelay);
+                            DoRestartRoom(false, BossPracticeDelay);
                         }
                     }
                 }
@@ -776,7 +1045,7 @@ namespace MGS2Trainer
 
                         if (Mem.ReadAddress<short>(addr, offsets) <= 0)
                         {
-                            DoRestartRoom(BossPracticeDelay);
+                            DoRestartRoom(false, BossPracticeDelay);
                         }
                     }
                 }
@@ -804,7 +1073,8 @@ namespace MGS2Trainer
 
         public void RelockDogTags()
         {
-            if (LockDogTags)
+            //if (LockDogTags)
+            if (SelectedAreaMods.Contains("Dog Tags always available"))
             {
                 Mem.WriteBytes(DogTagsArrayAddr, null, DogTagsArrayClear);
             }
@@ -852,6 +1122,186 @@ namespace MGS2Trainer
         }
 
 
+        public void UnlockCastingTheaterCharacters()
+        {
+            int count = 32 * 4;
+            byte[] bytes = new byte[count];
+            for (int i = 0; i < count; i++)
+            {
+                bytes[i] = 255;
+            }
+            Mem.WriteBytes(0xAD4FD0, new UInt32[] { 0xA4 }, bytes);
+        }
+
+        public static UInt32[] NullOffset = new UInt32[] { 0 };
+        public static UInt32[] ContinueDataAddr = new UInt32[] { 0x601F38, 0x601F40 };
+        public ContinueState ContinueData
+        {
+            get
+            {
+                /*
+                return new ContinueState(
+                    Mem.ReadBytes(ContinueDataAddr[0], NullOffset, 0x566 * 4),
+                    Mem.ReadBytes(ContinueDataAddr[1], NullOffset, 0x700 * 4)
+                );
+                */
+        
+                
+                return new ContinueState(
+                    Mem.ReadBytes(ContinueDataAddr[0], new UInt32[] { 0x1C }, 0x20),
+                    Mem.ReadBytes(ContinueDataAddr[1], new UInt32[] { 0x930 }, 0x90)
+                );
+            }
+            set
+            {
+                var keep = new int[] { 0x32, 0x33, 0x4c, 0x4d, 0x231, 0x3A0 };
+
+                var data2 = new byte[0x700*4];
+                foreach (var a in keep)
+                {
+                    data2[a] = value.Data2[a];
+                }
+
+                Array.Copy(value.Data2, 0x930, data2, 0x930, 0x90);
+
+
+                //data2 = value.Data2;
+
+
+                Mem.WriteBytes(ContinueDataAddr[0], NullOffset, value.Data1);
+                Mem.WriteBytes(ContinueDataAddr[1], NullOffset, data2);
+            }
+        }
+
+        public void TriggerOnPropertyChanged(string name)
+        {
+            OnPropertyChanged(name);
+        }
+
+        public void SetSelectedWarpGroup(string name)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            string resourcePath = $"MGS2Trainer.Resources.WarpProfiles.{name}.json";
+            string json = "";
+            using (Stream stream = assembly.GetManifestResourceStream(resourcePath))
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                json = reader.ReadToEnd();
+            }
+            WarpData = new WarpConfig(json);
+            SelectedWarpGroup = WarpData.WarpGroupsList.FirstOrDefault();
+            OnPropertyChanged("WarpData");
+            OnPropertyChanged("SelectedWarpGroup");
+        }
+
+        public void UpdateWarpEntries()
+        {
+            //WarpEntries = SelectedWarpGroup.WarpsList;
+            //OnPropertyChanged("WarpEntries");
+            if (SelectedWarpGroup == null)
+            {
+                SelectedWarpGroup = WarpData.WarpGroupsList.First();
+            }
+            SelectedWarp = SelectedWarpGroup.WarpsList.First();
+            OnPropertyChanged("SelectedWarp");
+            OnPropertyChanged("SelectedWarpGroup");
+        }
+
+        public void ApplySelectedWarp()
+        {
+            SelectedWarp.Apply(WarpData, this);
+            DoRestartRoom();
+        }
+
+        private Dictionary<string, IPSPatch> IPSPatches = new Dictionary<string, IPSPatch>();
+        public void ApplyIPSPatch(string name)
+        {
+            if (IPSPatches.ContainsKey(name))
+            {
+                IPSPatches[name].Apply();
+            }
+            else
+            {
+                var patch = new IPSPatch(name, Mem);
+                if (patch.Valid)
+                {
+                    patch.Apply();
+                    IPSPatches.Add(name, patch);
+                }
+            }  
+        }
+
+        public void RevertIPSPatch(string name)
+        {
+            if (IPSPatches.ContainsKey(name))
+            {
+                IPSPatches[name].Revert();
+            }
+            else
+            {
+                throw new Exception($"The patch {name} hasn't been applied yet, can't revert it.");
+            }
+        }
+
+
+        public void Test()
+        {
+            Mem.GameProcess[(IntPtr)0x889440, true].Execute(0, 100, 100, 0);
+            //Mem.GameProcess[(IntPtr)0x889b40, true].Execute("TESTING");
+
+        }
+
+
+        public void SetHostageHour(int hour)
+        {
+            byte hr = (byte)(hour % 24);
+            UInt32[] offset = new UInt32[] { 0x6F9 };
+            Mem.WriteAddress<byte>(0x601F3C, offset, hr);
+            Mem.WriteAddress<byte>(0x601F40, offset, hr);
+            //Mem.WriteAddress<byte>(0x601F34, new UInt32[] { 0xBC }, 0);
+        }
+
+        public List<string> WarpProfiles { get; } = new List<string>()
+        {
+            "Tanker",
+            "Plant (early Shell 1)",
+            "Plant (bomb disposal, clockwise)",
+            "Plant (bomb disposal, anticlockwise)",
+            "Plant (bomb disposal, AC conveyor)",
+            "Plant (bomb disposal, FB conveyor)",
+            "Plant (late Shell 1)",
+            "Plant (Shell 2)",
+            "Plant (Arsenal Gear)"
+        };
 
     }
+
+    
+    public class ContinueState
+    {
+        public byte[] Data1;
+        public byte[] Data2;
+        
+        public ContinueState(byte[] d1, byte[] d2)
+        {
+            Data1 = d1; // mgs2_sse.exe+601F34
+            Data2 = d2; // mgs2_sse.exe+601F40
+        }
+
+        public ContinueState(string d1, string d2)
+        {
+            Data1 = Convert.FromBase64String(d1);
+            Data2 = Convert.FromBase64String(d2);
+        }
+
+        public byte HostageHour
+        {
+            get { return Data2[0x6F9]; }
+            set { Data2[0x6F9] = value; }
+        }
+    }
+
+
 }
+
+

@@ -1,0 +1,206 @@
+﻿[
+  {
+    "name": "Strut A Deep Sea Dock (Plant start)",
+    "weapons": [ 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 ],
+    "items": [ 1, 0, 0, 0, 0, 0, 0, 0, -3, 0, 0, 0, 0, 0, 1, -3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -3, 0, 0, -3, -3, -3, 0, 0 ],
+    "equip": [ 0, 0, 1, 0 ],
+    "warps": [
+      {
+        "name": "Plant Intro",
+        "location": "start-plant",
+        "progress": 0
+      },
+      {
+        "name": "Game start",
+        "location": "w11a-start"
+      },
+      {
+        "name": "Entering main room",
+        "location": "w11a-room"
+      },
+      {
+        "name": "Waiting for elevator",
+        "location": "w11a-elevator"
+      }
+    ]
+  },
+
+  {
+    "name": "Strut A roof (before Stillman)",
+    "difficulty": {
+      "1": {
+        "weapons": [ null, -2, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null ]
+      }
+    },
+    "warps": [
+      {
+        "name": "Strut A Deep Sea Dock",
+        "location": "w12a-w11a-start"
+      },
+      {
+        "name": "Strut A Pump Room (left)",
+        "location": "w12a-w12b-l"
+      },
+      {
+        "name": "Strut A Pump Room (right)",
+        "location": "w12a-w12b-r"
+      }
+    ]
+  },
+
+  {
+    "name": "Strut A Pump Room (before Stillman)",
+    "parent": [ "Strut A roof (before Stillman)" ],
+    "difficulty": {
+      "2": {
+        "weapons": [ null, -2, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null ]
+      }
+    },
+    "warps": [
+      {
+        "name": "Strut A roof (left)",
+        "location": "w12b-w12a-l"
+      },
+      {
+        "name": "Strut A roof (right)",
+        "location": "w12b-w12a-r"
+      },
+      {
+        "name": "AB connecting bridge",
+        "location": "w12b-w13a"
+      },
+      {
+        "name": "FA connecting bridge",
+        "location": "w12b-w23a"
+      }
+    ]
+  },
+
+  {
+    "name": "FA connecting bridge (before Stillman)",
+    "parent": [ "Strut A Pump Room (before Stillman)" ],
+    "warps": [
+      {
+        "name": "Strut A Pump Room",
+        "location": "w23a-w12b"
+      },
+      {
+        "name": "Strut F warehouse (top)",
+        "location": "w23a-w12b-t"
+      },
+      {
+        "name": "Strut F warehouse (bottom)",
+        "location": "w23a-w12b-b"
+      }
+    ]
+  },
+
+  {
+    "name": "Strut F warehouse (before Stillman)",
+    "warps": [
+      {
+        "name": "FA connecting bridge (top)",
+        "location": "w22a-w23a-t"
+      },
+      {
+        "name": "FA connecting bridge (bottom)",
+        "location": "w22a-w23a-b"
+      }
+    ]
+  },
+
+  {
+    "name": "AB connecting bridge (before Stillman)",
+    "warps": [
+      {
+        "name": "Strut A Pump Room",
+        "location": "w13a-w12b"
+      },
+      {
+        "name": "Strut B Transformer Room",
+        "location": "w13a-w14a"
+      }
+    ]
+  },
+
+  {
+    "name": "Strut B Transformer Room (before Stillman)",
+    "warps": [
+      {
+        "name": "AB connecting bridge (before Pliskin)",
+        "location": "w14a-w13a"
+      },
+      {
+        "name": "AB connecting bridge (after Pliskin)",
+        "location": "w14a-w13a",
+        "parent": [ "Strut B Transformer Room (before Stillman)", "after Pliskin cutscene" ]
+      },
+      {
+        "name": "after Pliskin cutscene",
+        "location": "w14a-pliskin",
+        "weapons": [ null, null, -2, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null ]
+      },
+      {
+        "name": "BC connecting bridge",
+        "location": "w14a-w15a",
+        "parent": [ "Strut B Transformer Room (before Stillman)", "after Pliskin cutscene" ]
+      }
+    ]
+  },
+
+  {
+    "name": "BC connecting bridge (before Stillman)",
+    "warps": [
+      {
+        "name": "after Fortune cutscene",
+        "location": "w15a-fortune"
+      },
+      {
+        "name": "Strut B Transformer Room",
+        "location": "w15a-w14a"
+      },
+      {
+        "name": "Strut C Dining Hall",
+        "location": "w15a-w16a"
+      }
+    ]
+  },
+
+  {
+    "name": "Strut C Dining Hall (before Stillman)",
+    "warps": [
+      {
+        "name": "BC connecting bridge",
+        "location": "w16a-w15a"
+      },
+      {
+        "name": "Stillman cutscenes",
+        "location": "w16a-stillman"
+      }
+    ]
+  },
+
+  {
+    "name": "Strut C Dining Hall (bomb disposal)",
+    "parent": [ "Strut C Dining Hall (before Stillman)" ],
+    "weapons": [ null, null, null, null, null, null, null, null, null, null, null, null, null, 1, null, null, null, null, null, null, null, null ],
+    "items": [ null, null, null, null, null, null, null, null, null, null, 1, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null ],
+    "warps": [
+      {
+        "name": "after Stillman cutscene",
+        "location": "w16b-after"
+      },
+      {
+        "name": "BC connecting bridge",
+        "location": "w16b-w15b"
+      },
+      {
+        "name": "CD connecting bridge",
+        "location": "w16b-w17a"
+      }
+    ]
+  },
+
+  /* bomb disposal fun */
+
+]
